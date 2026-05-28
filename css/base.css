@@ -1,0 +1,90 @@
+/* --- 2.4 Body Base --- */
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* --- 2.5 Typography Scale --- */
+
+h1,
+h2,
+h3 {
+    font-family: var(--font-heading);
+    color: var(--text-heading);
+    line-height: 1.2;
+    margin-bottom: var(--space-sm);
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+}
+
+h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+p {
+    color: var(--text-primary);
+    line-height: 1.7;
+    margin-bottom: var(--space-md);
+    max-width: 600px;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+/* --- Base Transitions --- */
+a,
+button {
+    transition: color 250ms ease-in-out, text-shadow 250ms ease-in-out, background-color 250ms ease-in-out, transform 250ms ease-in-out, box-shadow 250ms ease-in-out;
+}
+
+/* --- 2.8 Card Surface Styling --- */
+
+article {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: var(--space-md);
+}
+
+/* --- Section Spacing & Fluid Container --- */
+
+section {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+}
+
+/* Global Navbar Offset Handling */
+section[id] {
+    scroll-margin-top: 5rem;
+}
+
+main {
+    padding-top: 5rem;
+}
+
+footer {
+    padding: var(--space-md) var(--space-sm);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+    border-top: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface);
+}

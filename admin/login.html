@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — Ozai</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="stylesheet" href="admin.css">
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const loginBtn = document.getElementById('login-btn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorMsg = document.getElementById('error-message');
+
+            if (loginBtn) {
+                loginBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const username = usernameInput.value;
+                    const password = passwordInput.value;
+
+                    if (Auth.login(username, password)) {
+                        window.location.href = 'index.html';
+                    } else {
+                        errorMsg.style.display = 'block';
+                        errorMsg.textContent = 'Invalid credentials';
+                    }
+                });
+
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        loginBtn.click();
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div class="login-container card">
+        <h1>Admin Login</h1>
+
+        <div id="error-message" class="error-message"></div>
+
+        <div class="field-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter admin username">
+        </div>
+
+        <div class="field-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter admin password">
+        </div>
+
+        <button id="login-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+    </div>
+</body>
+
+</html>

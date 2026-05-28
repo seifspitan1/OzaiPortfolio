@@ -1,0 +1,32 @@
+/* --- 2.2 Design Tokens --- */
+
+:root {
+    /* Colors */
+    --bg-primary: #0b1020;
+    --bg-surface: #12121f;
+    --bg-surface-hover: #1a1a2e;
+    --text-primary: #ffffff;
+    --text-heading: #ffffff;
+    --text-muted: #b6b6c5;
+
+    --brand-primary: #F0AE29;
+    --accent: #29CFF0;
+    --accent-strong: #4B29F0;
+
+    --accent-glow: rgba(41, 207, 240, 0.4);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+
+    /* Spacing */
+    --space-2xs: 8px;
+    --space-xs: 12px;
+    --space-sm: 16px;
+    --space-md: 24px;
+    --space-lg: 40px;
+    --space-xl: 64px;
+    --space-2xl: 96px;
+    --space-3xl: 128px;
+
+    /* Typography */
+    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Outfit', sans-serif;
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Ozai</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="stylesheet" href="admin.css?v=1.2">
+    <script src="auth.js"></script>
+    <script type="module" src="main.js"></script>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- ═══ Header ═══ -->
+        <header class="admin-header">
+            <div class="header-left">
+                <h1>Admin Panel</h1>
+                <span class="badge">Ozai Portfolio</span>
+            </div>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <div class="admin-actions" style="display:flex; align-items:center; gap:10px;">
+                    <span id="saveStatus" style="font-size:0.85rem; color:var(--admin-accent);"></span>
+                    <button id="saveAll" class="btn btn-primary">Save Changes</button>
+                </div>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <!-- ═══ Tabs ═══ -->
+        <nav class="tabs section-block">
+            <button class="tab-btn active" data-tab="hero">Hero</button>
+            <button class="tab-btn" data-tab="portfolio">Portfolio</button>
+            <button class="tab-btn" data-tab="feedbacks">Feedbacks</button>
+        </nav>
+
+        <!-- ═══ Main Area ═══ -->
+        <main>
+            <!-- ═══ Hero Tab ═══ -->
+            <section id="tab-hero" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Hero Section</h2>
+                </div>
+
+                <div class="card section-block">
+                    <div class="field-group">
+                        <label>Hero Image</label>
+                        <div class="upload-field">
+                            <label class="upload-button" style="margin: 0; opacity: 1;">
+                                Choose Hero Image
+                                <input type="file" id="heroUpload" accept="image/*">
+                            </label>
+                            <span id="heroFileName" class="file-name">No file selected</span>
+                        </div>
+                        <img id="heroPreview" style="margin-top:10px; max-width:100%; border-radius:8px;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ Portfolio Tab ═══ -->
+            <section id="tab-portfolio" class="tab-content">
+                <div class="tab-header section-block">
+                    <h2>Portfolio Projects</h2>
+                    <button class="btn btn-primary" id="add-project-btn">+ Add Project</button>
+                </div>
+
+                <div class="items-container" id="portfolio-items">
+                    <div class="empty-state">No projects added yet.</div>
+                </div>
+            </section>
+
+            <!-- ═══ Feedbacks Tab ═══ -->
+            <section id="tab-feedbacks" class="tab-content">
+                <div class="tab-header section-block">
+                    <h2>Client Feedbacks</h2>
+                    <button class="btn btn-primary" id="add-feedback-btn">+ Add Feedback</button>
+                </div>
+
+                <div class="items-container" id="feedback-items">
+                    <div class="empty-state">No feedbacks added yet.</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ═══ Templates (hidden) ═══ -->
+    <template id="tpl-project-item">
+        <div class="card item-card section-block" data-type="project">
+            <div class="item-card-header">
+                <span>Project <span class="item-index"></span></span>
+                <div class="item-actions">
+                    <button class="btn btn-secondary btn-icon move-up" title="Move up">↑</button>
+                    <button class="btn btn-secondary btn-icon move-down" title="Move down">↓</button>
+                    <button class="btn btn-danger btn-icon delete-item" title="Delete">✕</button>
+                </div>
+            </div>
+            <div class="item-fields portfolio-fields">
+                <div class="field-group">
+                    <label>Project Image</label>
+                    <div class="upload-field">
+                        <label class="upload-button" style="margin: 0; opacity: 1;">
+                            Choose Image
+                            <input type="file" class="projectImageUpload" accept="image/*">
+                        </label>
+                        <span class="file-name">No file selected</span>
+                    </div>
+                    <img class="projectPreview" style="margin-top:8px; border-radius:6px; max-width:100%;">
+                </div>
+                <div class="field-group">
+                    <label>Title</label>
+                    <input type="text" class="project-title" placeholder="Project name">
+                </div>
+                <div class="field-group">
+                    <label>Link</label>
+                    <input type="url" class="project-link" placeholder="https://...">
+                </div>
+                <div class="field-group">
+                    <label>Description</label>
+                    <textarea class="project-description" placeholder="Project description..."></textarea>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-feedback-item">
+        <div class="card item-card section-block" data-type="feedback">
+            <div class="item-card-header">
+                <span>Feedback <span class="item-index"></span></span>
+                <div class="item-actions">
+                    <button class="btn btn-secondary btn-icon move-up" title="Move up">↑</button>
+                    <button class="btn btn-secondary btn-icon move-down" title="Move down">↓</button>
+                    <button class="btn btn-danger btn-icon delete-item" title="Delete">✕</button>
+                </div>
+            </div>
+            <div class="item-fields feedback-fields">
+                <div class="field-group">
+                    <label>Client Name</label>
+                    <input type="text" class="feedback-name" placeholder="e.g. Astral Studios">
+                </div>
+                <div class="field-group">
+                    <label>Stars</label>
+                    <div class="star-rating" data-value="5">
+                        <span data-index="1"></span>
+                        <span data-index="2"></span>
+                        <span data-index="3"></span>
+                        <span data-index="4"></span>
+                        <span data-index="5"></span>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Feedback Text</label>
+                    <textarea class="feedback-text" placeholder="What the client said..."></textarea>
+                </div>
+            </div>
+        </div>
+    </template>
+</body>
+
+</html>

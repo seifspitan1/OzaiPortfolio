@@ -1,0 +1,16 @@
+# Disable execution of scripts inside uploads directory
+# Protects the application against remote script execution via uploads
+
+# Disable parsing of PHP files
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php6|php7|pl|py|jsp|asp|htm|html|sh|shtml)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Force appropriate image MIME headers on image extensions
+<FilesMatch "(?i)\.(jpg|jpeg|png|gif|webp)$">
+    ForceType image/jpeg
+</FilesMatch>
+
+# Prevent override directives
+Options -Indexes

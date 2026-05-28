@@ -1,0 +1,231 @@
+/* ========================================
+   LAYER 3 — SECTION LAYOUT (DESKTOP)
+   Base styles = Mobile Layout
+   ======================================== */
+
+/* --- 3.1 Navbar --- */
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    /* Fluid Container Layout: Matches section content boundaries */
+    padding-block: 0;
+    padding-inline: max(var(--space-md), calc((100vw - 1200px) / 2));
+
+    min-height: 100px;
+
+    background-color: rgba(10, 10, 20, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-bottom: 1px solid var(--border-subtle);
+    z-index: 50;
+    overflow: visible;
+    transition: min-height 0.4s ease;
+}
+
+nav.scrolled {
+    min-height: 64px;
+}
+
+.nav-links {
+    list-style: none;
+    display: none;
+    flex-direction: column;
+    gap: var(--space-md);
+    flex-basis: 100%;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+}
+
+nav.nav-open .nav-links {
+    display: flex;
+}
+
+/* ---------------------------- */
+/* Pill Buttons */
+/* ---------------------------- */
+
+.nav-links a {
+    display: block;
+    max-width: none !important;
+    /* CRUISERS: Explicitly rejecting global paragraph text limits */
+    padding: 12px 22px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 30px;
+    background: transparent;
+    border: 1px solid rgba(240, 174, 41, 0.35);
+    color: var(--brand-primary);
+    transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nav-links a:hover {
+    background: var(--brand-primary);
+    color: var(--bg-primary);
+    border-color: rgba(240, 174, 41, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(240, 174, 41, 0.35);
+}
+
+.nav-links a:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.nav-links a.active {
+    background: rgba(240, 174, 41, 0.15);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+/* -------------------------------- */
+/* CENTER PLACE ORDER BUTTON (NOTCH) */
+/* -------------------------------- */
+
+.nav-center-action {
+    /* ARCHITECTURE OPTION B: Static Flow Placeholder */
+    /* This element establishes an immutable Grid track width so siblings NEVER overlap or shift on scroll. */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 200px;
+    height: 100%;
+    /* Spans the available height of the flex/grid wrapper safely */
+}
+
+.center-btn {
+    /* Visiual Button is completely decoupled from Grid flow geometry */
+    position: absolute;
+    top: 0;
+
+    /* Hero State 1: Floating Out Of Bounds */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(200px, 20vw, 240px);
+    height: 150px;
+
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #000;
+    background: var(--brand-primary);
+    border-radius: 0 0 26px 26px;
+    box-shadow: 0 12px 35px rgba(41, 207, 240, 0.35);
+
+    animation: pulseGlow 3s ease-in-out infinite;
+
+    /* Strict hardware-accelerated transition orchestrations */
+    transition:
+        width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        top 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-radius 0.4s ease,
+        font-size 0.4s ease,
+        transform 0.25s ease,
+        background 0.25s ease;
+
+    pointer-events: auto;
+}
+
+.center-btn:hover {
+    transform: translateY(-2px);
+    background: var(--accent);
+}
+
+.center-btn:active {
+    transform: translateY(0);
+}
+
+/* -------------------------------- */
+/* SCROLLED STATE */
+/* -------------------------------- */
+
+nav.scrolled .center-btn {
+    /* State 2 (Anchored): Compresses strictly into the placeholder footprint */
+    top: 50%;
+    /* Center relative to scrolled nav bar height */
+    transform: translateY(-50%);
+    /* Absolute Y centering offset */
+
+    width: 200px;
+    height: 46px;
+
+    border-radius: 14px;
+    font-size: 1rem;
+    animation: none;
+    box-shadow: 0 6px 18px rgba(41, 207, 240, 0.25);
+}
+
+/* Override transform offsets correctly to maintain vertical centering during interaction */
+nav.scrolled .center-btn:hover {
+    transform: translateY(calc(-50% - 2px));
+    background: var(--accent);
+}
+
+nav.scrolled .center-btn:active {
+    transform: translateY(-50%);
+}
+
+/* -------------------------------- */
+/* GLOW ANIMATION */
+/* -------------------------------- */
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 10px 25px rgba(240, 174, 41, 0.25);
+    }
+
+    50% {
+        box-shadow: 0 18px 45px rgba(240, 174, 41, 0.65);
+    }
+
+    100% {
+        box-shadow: 0 10px 25px rgba(240, 174, 41, 0.25);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-center-action .center-btn {
+        animation: none;
+    }
+
+    .nav-links a {
+        transition: none;
+    }
+
+    nav {
+        transition: none;
+    }
+}
+
+.menu-toggle {
+    display: block;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-icon {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: var(--text-primary);
+    transition: background-color 200ms ease;
+}
+
+.menu-toggle:hover .menu-icon {
+    background-color: var(--brand-primary);
+}

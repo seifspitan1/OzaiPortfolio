@@ -1,0 +1,156 @@
+/* ========================================
+   RESPONSIVE — Breakpoints & Scaling
+   ======================================== */
+
+/* --- Mobile / Tablet Feature Reduction (< 1024px) --- */
+@media (max-width: 1023px) {
+
+    /* Option B Implementation: Completely eliminate the Grid Placeholder 
+       and visual CTA from the DOM flow on small screens. */
+    .nav-center-action {
+        display: none !important;
+    }
+
+    /* Layout Adjustment: Since the 200px ghost placeholder is gone, 
+       we use margin-auto to safely push the orphaned hamburger back to the right edge. */
+    .menu-toggle {
+        margin-left: auto;
+    }
+}
+
+/* --- Tablet Breakpoint (768px - 1023px) --- */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    /* Adjust grid for mid-sized screens to prevent stretching or squishing */
+    .card-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+
+    .feedback-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+
+    #hero {
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero-content {
+        align-items: center;
+    }
+
+    /* We maintain Mobile-style Hamburger Navigation on strict Tablet portrait devices 
+       to prevent tight crowding of navbar elements due to the notch CTA sizing. */
+}
+
+/* --- Desktop Breakpoint (≥ 1024px) --- */
+@media (min-width: 1024px) {
+
+    section {
+        padding-top: var(--space-3xl);
+        padding-bottom: var(--space-3xl);
+        padding-left: max(var(--space-md), calc((100vw - 1200px) / 2));
+        padding-right: max(var(--space-md), calc((100vw - 1200px) / 2));
+    }
+
+    /* --- Navbar Desktop: 3-Column Grid Redesign --- */
+    nav {
+        border-bottom: 1px solid var(--border-subtle);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: start;
+        /* Allow notch to hang from top */
+        gap: var(--space-2xl);
+        /* CRITICAL: Enforces distinct spacing between links and CTA badge */
+    }
+
+    /* Force the Center CTA into document flow directly to establish its spatial bounding block */
+    .nav-center-action {
+        position: relative;
+        left: unset;
+        top: unset;
+        transform: none;
+        margin-inline: auto;
+        /* Centers the block internally */
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: row;
+        gap: var(--space-md);
+        margin: 0;
+        padding: 0;
+        height: 100px;
+        /* Align vertically relative to nav bar height */
+        align-items: center;
+    }
+
+    .left-links {
+        justify-content: flex-end;
+    }
+
+    .right-links {
+        justify-content: flex-start;
+    }
+
+    .menu-toggle {
+        display: none;
+        /* Mobile menu hidden on desktop */
+    }
+
+    /* --- Hero Desktop --- */
+    #hero {
+        flex-direction: row;
+        align-items: center;
+        min-height: calc(100vh - 5rem);
+    }
+
+    .hero-content {
+        flex: 1;
+        flex-basis: 50%;
+    }
+
+    .hero-image {
+        flex: 1;
+        flex-basis: 50%;
+    }
+
+    /* --- Commissions Desktop --- */
+    .card-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg);
+    }
+
+    /* --- Portfolio Desktop --- */
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg);
+    }
+
+    /* --- Feedbacks Desktop --- */
+    .feedback-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg);
+    }
+
+    /* --- CTA Desktop --- */
+    #order {
+        max-width: 800px;
+        margin-inline: auto;
+    }
+}

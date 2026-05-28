@@ -1,0 +1,96 @@
+#particle-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.brand-particle-wrapper {
+    position: absolute;
+    top: -100px;
+    left: var(--start-x);
+    width: var(--size);
+    /* JS offset controls active 3D transform shifting */
+}
+
+.brand-particle {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: brightness(1.2) contrast(1.1) blur(0.5px);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: particleDrift var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--delay) forwards;
+}
+
+.brand-particle-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--asset-path);
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: blur(var(--glow-blur, 8px));
+    opacity: var(--glow-opacity, 0.4);
+    z-index: -1;
+    will-change: transform, opacity;
+    animation: particleDrift var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--delay) forwards;
+}
+
+.brand-particle-wrapper.near-layer .brand-particle,
+.brand-particle-wrapper.near-layer::after {
+    animation-name: particleDriftNear;
+}
+
+@keyframes particleDrift {
+    0% {
+        transform: translate3d(0px, 0vh, 0px) scale(var(--scale-start)) rotate(var(--rot-start));
+        opacity: 0;
+    }
+
+    15% {
+        opacity: var(--max-opacity);
+    }
+
+    70% {
+        opacity: var(--max-opacity);
+    }
+
+    85% {
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate3d(var(--drift-x), var(--end-y), 0px) scale(var(--scale-end)) rotate(var(--rot-end));
+        opacity: 0;
+    }
+}
+
+@keyframes particleDriftNear {
+    0% {
+        transform: translate3d(0px, 0vh, 0px) scale(var(--scale-start)) scaleY(1) rotate(var(--rot-start));
+        opacity: 0;
+    }
+
+    15% {
+        opacity: var(--max-opacity);
+    }
+
+    70% {
+        opacity: var(--max-opacity);
+    }
+
+    85% {
+        opacity: 0;
+    }
+
+    100% {
+        /* Pseudo motion blur uses vertical stretch scaleY(1.15) */
+        transform: translate3d(var(--drift-x), var(--end-y), 0px) scale(var(--scale-end)) scaleY(1.15) rotate(var(--rot-end));
+        opacity: 0;
+    }
+}

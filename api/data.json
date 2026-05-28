@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "lastModified": 1779527539912,
+    "data": {
+        "hero": {
+            "id": "31a0588d-6af4-48dd-8b26-bee9440052d0",
+            "imageUrl": "uploads\/6a116880744a1.png"
+        },
+        "portfolio": [
+            {
+                "id": "de87941f-a277-4f02-bbda-c5b81a2c639a",
+                "order": 1,
+                "title": "test",
+                "description": "",
+                "link": "",
+                "imageUrl": "uploads\/6a116f690ed65.png"
+            }
+        ],
+        "feedbacks": [
+            {
+                "id": "af92db80-2d6c-4265-a23c-8a9f1d5b0b13",
+                "order": 1,
+                "clientName": "test",
+                "text": "test",
+                "rating": 5
+            }
+        ]
+    }
+}

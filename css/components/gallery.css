@@ -1,0 +1,79 @@
+/* --- Gallery Surface --- */
+
+.gallery-item {
+    display: block;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* --- Gallery Image --- */
+
+.gallery-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: inherit;
+    transform-origin: center;
+}
+
+/* --- Gallery Title --- */
+
+.gallery-title {
+    display: block;
+    padding: var(--space-xs) var(--space-sm);
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 10px 0 0;
+    min-height: 2.8em;
+    max-width: none;
+    opacity: 0.8;
+    transition: opacity 0.25s ease, letter-spacing 0.25s ease;
+}
+
+/* --- Gallery Hover Polish --- */
+
+.gallery-item {
+    position: relative;
+}
+
+.gallery-item:hover {
+    transform: translateY(-4px);
+    opacity: 0.95;
+}
+
+.gallery-item:active {
+    transform: translateY(0) scale(0.985);
+    opacity: 0.85;
+}
+
+.gallery-item:hover .gallery-title {
+    opacity: 1;
+    letter-spacing: 0.04em;
+}
+
+/* --- External Link Indicator --- */
+
+.gallery-item::after {
+    content: "↗";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.gallery-item:hover::after {
+    opacity: 0.7;
+}
