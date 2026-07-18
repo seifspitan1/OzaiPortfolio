@@ -3,32 +3,33 @@
 .cta-button {
     display: inline-block;
     padding: var(--space-xs) var(--space-md);
-    background-color: var(--brand-primary);
-    color: #000;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+    color: #09090b;
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 600;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 10px 40px rgba(240, 174, 41, 0.35);
-    transition: transform 250ms ease, box-shadow 250ms ease, background-color 250ms ease;
+    box-shadow: 0 6px 20px var(--glow-soft);
+    transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
 }
 
 .cta-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 50px rgba(240, 174, 41, 0.5);
+    background: linear-gradient(135deg, var(--brand-secondary), var(--brand-primary));
+    box-shadow: 0 10px 30px rgba(96, 165, 250, 0.4);
 }
 
 .cta-button.secondary {
-    background-color: transparent;
-    border: 1px solid rgba(41, 207, 240, 0.35);
+    background: transparent;
+    border: 1px solid var(--border-highlight);
     color: var(--text-primary);
     box-shadow: none;
 }
 
 .cta-button.secondary:hover {
-    background-color: transparent;
-    box-shadow: 0 6px 25px rgba(41, 207, 240, 0.4);
-    color: var(--accent);
+    background: transparent;
+    box-shadow: 0 0 20px var(--glow-soft);
+    color: var(--brand-primary);
 }

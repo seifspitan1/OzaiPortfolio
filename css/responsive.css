@@ -15,6 +15,98 @@
        we use margin-auto to safely push the orphaned hamburger back to the right edge. */
     .menu-toggle {
         margin-left: auto;
+        order: 1;
+    }
+
+    nav.nav-open {
+        flex-wrap: wrap;
+    }
+
+    .mobile-navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        order: 0;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-navbar-brand:hover {
+        transform: translateY(-1px);
+    }
+
+    .mobile-navbar-logo {
+        width: 52px;
+        height: 52px;
+        object-fit: contain;
+        display: block;
+        transition: filter 0.3s ease;
+        filter: drop-shadow(0 4px 10px rgba(56, 189, 248, 0.15));
+    }
+
+    .mobile-navbar-brand:hover .mobile-navbar-logo {
+        filter: drop-shadow(0 6px 15px rgba(56, 189, 248, 0.3)) brightness(1.1);
+    }
+
+    .mobile-navbar-title {
+        font-family: 'Road Rage', cursive;
+        font-size: 2.6rem;
+        line-height: 0.85;
+        color: #ffffff;
+        text-shadow:
+            0 0 18px rgba(56, 189, 248, 0.22),
+            0 0 40px rgba(56, 189, 248, 0.10);
+        transition: text-shadow 0.3s ease;
+        display: inline-block;
+        transform: translateY(2px);
+    }
+
+    .mobile-navbar-brand:hover .mobile-navbar-title {
+        text-shadow:
+            0 0 20px rgba(56, 189, 248, 0.45),
+            0 0 45px rgba(56, 189, 248, 0.25);
+    }
+
+    nav.nav-open .mobile-nav-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 24px;
+        padding-bottom: 32px;
+        gap: 14px;
+        flex-basis: 100%;
+        order: 2;
+    }
+
+    .mobile-nav-logo {
+        width: 84px;
+        height: 84px;
+        object-fit: contain;
+        display: block;
+        filter: drop-shadow(0 12px 30px rgba(56, 189, 248, 0.20));
+    }
+
+    .mobile-nav-title {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        color: white;
+    }
+
+    .left-links {
+        order: 3;
+        margin-top: 1rem;
+    }
+
+    .right-links {
+        order: 4;
+        margin-top: 0;
+    }
+
+    .hero-brand {
+        display: none !important;
     }
 }
 
@@ -125,6 +217,10 @@
     .hero-image {
         flex: 1;
         flex-basis: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: visible;
     }
 
     /* --- Commissions Desktop --- */
@@ -150,7 +246,56 @@
 
     /* --- CTA Desktop --- */
     #order {
-        max-width: 800px;
+        max-width: none !important;
+        margin-inline: 0;
+        padding-left: var(--space-lg);
+        padding-right: var(--space-lg);
+        position: relative;
+        overflow: visible;
+    }
+
+    .cta-container {
+        position: relative;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start; /* Place panel left, character right absolute */
+        max-width: 1200px;
         margin-inline: auto;
+        min-height: 480px; /* Give the container nice vertical presence */
+    }
+
+    .cta-panel {
+        flex: 0 0 60%;
+        max-width: 680px;
+        align-items: flex-start;
+        text-align: left;
+        padding: 56px 64px;
+        z-index: 5;
+    }
+
+    .cta-character-wrapper {
+        position: absolute;
+        right: -40px; /* Breakout outside right container boundary */
+        bottom: -90px; /* Breakout outside bottom section boundary */
+        top: -60px; /* Breakout outside top section boundary */
+        width: 48%; /* Visually independent scaling */
+        height: auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        pointer-events: none; /* Let clicks pass to background elements if needed */
+        z-index: 10; /* Foreground overlay layers */
+    }
+
+    .cta-character-img {
+        max-height: 600px; /* Make it large, larger than panel height */
+        width: auto;
+        height: auto;
+        transform: translateY(0) scale(1);
+    }
+    
+    #order:hover .cta-character-img {
+        transform: translateY(-12px) scale(1.03); /* Foreground atmospheric lift */
+        filter: drop-shadow(0 35px 60px rgba(56, 189, 248, 0.15)) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));
     }
 }

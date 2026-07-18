@@ -13,25 +13,33 @@
     <title>Ozai</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@600;700&family=Syncopate:wght@700&family=Space+Grotesk:wght@700;800&family=Road+Rage&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components/navbar.css">
-    <link rel="stylesheet" href="css/components/buttons.css">
-    <link rel="stylesheet" href="css/components/cards.css">
-    <link rel="stylesheet" href="css/components/gallery.css">
-    <link rel="stylesheet" href="css/effects.css">
-    <link rel="stylesheet" href="css/effects/custom-particles.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/reset.css?v=2.7">
+    <link rel="stylesheet" href="css/variables.css?v=2.7">
+    <link rel="stylesheet" href="css/base.css?v=2.7">
+    <link rel="stylesheet" href="css/layout.css?v=2.7">
+    <link rel="stylesheet" href="css/components/navbar.css?v=2.7">
+    <link rel="stylesheet" href="css/components/buttons.css?v=2.7">
+    <link rel="stylesheet" href="css/components/cards.css?v=2.7">
+    <link rel="stylesheet" href="css/components/gallery.css?v=2.7">
+    <link rel="stylesheet" href="css/effects.css?v=2.7">
+    <link rel="stylesheet" href="css/effects/custom-particles.css?v=2.7">
+    <link rel="stylesheet" href="css/responsive.css?v=2.7">
 </head>
 
 <body>
     <div id="particle-layer" aria-hidden="true"></div>
     <header>
         <nav class="navbar">
+            <div class="mobile-navbar-brand">
+                <img src="assets/logo.png" class="mobile-navbar-logo" alt="Ozai Logo">
+                <span class="mobile-navbar-title">OZAI</span>
+            </div>
+            <div class="mobile-nav-brand">
+                <img src="assets/logo.png" class="mobile-nav-logo" alt="Ozai Logo">
+                <span class="mobile-nav-title">Ozai</span>
+            </div>
             <ul class="nav-links left-links">
                 <li><a href="#feedbacks">Feedbacks</a></li>
                 <li><a href="#hero">Home</a></li>
@@ -54,6 +62,10 @@
     <main>
         <section id="hero">
             <div class="hero-content">
+                <div class="hero-brand">
+                    <img src="assets/logo.png" class="hero-logo" alt="Ozai Logo">
+                    <span class="hero-brand-text">OZAI</span>
+                </div>
                 <h1>Premium Roblox GFX & Visuals</h1>
                 <p>High-impact 3D renders, thumbnails, and key art explicitly engineered to drive clicks and elevate
                     your studio's brand.</p>
@@ -65,26 +77,56 @@
         </section>
 
         <section id="commissions" class="reveal">
+            <span class="section-tag">01 / [ SERVICES ]</span>
             <h2>Commissions</h2>
             <div class="card-group">
-                <article class="card reveal">
-                    <h3>Thumbnails</h3>
-                    <p>Eye-catching Roblox game thumbnails designed to boost clicks and attract players to your
-                        experience.</p>
+                <article class="card service-card reveal">
+                    <div class="service-header">
+                        <div class="service-icon">✦</div>
+                        <h3>Thumbnails</h3>
+                    </div>
+                    <div class="service-meta">Roblox Game Visuals</div>
+                    <p>Eye-catching Roblox game thumbnails designed to boost clicks and attract players to your experience.</p>
+                    <ul class="service-features">
+                        <li><span>✓</span> High-Impact 3D Renders</li>
+                        <li><span>✓</span> Custom Lighting & FX</li>
+                        <li><span>✓</span> Optimized for Click-Through Rates</li>
+                    </ul>
+                    <a href="#order" class="service-btn">Order Thumbnail</a>
                 </article>
-                <article class="card reveal">
-                    <h3>Banners</h3>
-                    <p>Professional banners for your Roblox group, social media, or Discord server with a premium gaming
-                        aesthetic.</p>
+                <article class="card service-card reveal">
+                    <div class="service-header">
+                        <div class="service-icon">✦</div>
+                        <h3>Banners</h3>
+                    </div>
+                    <div class="service-meta">Socials & Server Art</div>
+                    <p>Professional banners for your Roblox group, social media, or Discord server with a premium gaming aesthetic.</p>
+                    <ul class="service-features">
+                        <li><span>✓</span> Ultra-Wide Layout Fit</li>
+                        <li><span>✓</span> High-Resolution Quality</li>
+                        <li><span>✓</span> Cohesive Branding Style</li>
+                    </ul>
+                    <a href="#order" class="service-btn">Order Banner</a>
                 </article>
-                <article class="card reveal">
-                    <h3>Logos</h3>
-                    <p>Custom logo designs that give your Roblox brand a unique and memorable identity.</p>
+                <article class="card service-card reveal">
+                    <div class="service-header">
+                        <div class="service-icon">✦</div>
+                        <h3>Logos</h3>
+                    </div>
+                    <div class="service-meta">Studio Identity Design</div>
+                    <p>Custom logo designs that give your Roblox brand a unique, memorable, and high-impact identity.</p>
+                    <ul class="service-features">
+                        <li><span>✓</span> Custom Typographic Art</li>
+                        <li><span>✓</span> High-Fidelity Vector Asset</li>
+                        <li><span>✓</span> Multi-Platform Ready</li>
+                    </ul>
+                    <a href="#order" class="service-btn">Order Logo</a>
                 </article>
             </div>
         </section>
 
         <section id="collaborations" class="reveal">
+            <span class="section-tag">02 / [ PORTFOLIO ]</span>
             <h2>Portfolio</h2>
             <div class="gallery">
                 <a href="https://example.com/project-1" class="gallery-item reveal" target="_blank" rel="noopener">
@@ -127,52 +169,60 @@
         </section>
 
         <section id="feedbacks" class="feedbacks-section reveal">
+            <span class="section-tag">03 / [ FEEDBACK ]</span>
             <h2>Client Feedbacks</h2>
             <p>Trusted by creators across the Roblox ecosystem — here's what they have to say.</p>
             <div class="feedback-grid">
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Ozai delivered an incredible thumbnail that tripled our game's
-                        click-through rate overnight. Absolutely blown away by the quality."</p>
-                    <span class="feedback-client">— Astral Studios</span>
+                    <p class="feedback-text">"Ozai delivered an incredible thumbnail that tripled our game's click-through rate overnight. Absolutely blown away by the quality."</p>
+                    <span class="feedback-client">Astral Studios</span>
                 </article>
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Best GFX designer I've worked with on Roblox. Fast turnaround, clean
-                        communication, and premium results every single time."</p>
-                    <span class="feedback-client">— PixelForge Dev</span>
+                    <p class="feedback-text">"Best GFX designer I've worked with on Roblox. Fast turnaround, clean communication, and premium results every single time."</p>
+                    <span class="feedback-client">PixelForge Dev</span>
                 </article>
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Our group logo and banners look insanely professional now. Ozai took our
-                        rough ideas and turned them into something next-level."</p>
-                    <span class="feedback-client">— NovaCraft Games</span>
+                    <p class="feedback-text">"Our group logo and banners look insanely professional now. Ozai took our rough ideas and turned them into something next-level."</p>
+                    <span class="feedback-client">NovaCraft Games</span>
                 </article>
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="4 out of 5 stars">★★★★☆</div>
-                    <p class="feedback-text">"Hired Ozai for a full rebrand — thumbnails, banners, the works. The
-                        attention to detail and cinematic quality is unmatched."</p>
-                    <span class="feedback-client">— Horizon Interactive</span>
+                    <p class="feedback-text">"Hired Ozai for a full rebrand — thumbnails, banners, the works. The attention to detail and cinematic quality is unmatched."</p>
+                    <span class="feedback-client">Horizon Interactive</span>
                 </article>
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"I've commissioned over 20 pieces and they just keep getting better. Ozai
-                        genuinely cares about making your vision come to life."</p>
-                    <span class="feedback-client">— Revenant Studios</span>
+                    <p class="feedback-text">"I've commissioned over 20 pieces and they just keep getting better. Ozai genuinely cares about making your vision come to life."</p>
+                    <span class="feedback-client">Revenant Studios</span>
                 </article>
                 <article class="card feedback-card reveal">
                     <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Clean, bold, premium — exactly what we needed for our competitive gaming
-                        brand. Would recommend Ozai to any serious studio."</p>
-                    <span class="feedback-client">— Apex Esports</span>
+                    <p class="feedback-text">"Clean, bold, premium — exactly what we needed for our competitive gaming brand. Would recommend Ozai to any serious studio."</p>
+                    <span class="feedback-client">Apex Esports</span>
                 </article>
             </div>
         </section>
 
-        <section id="order">
-            <h2>Ready to Upgrade Your Roblox Visuals?</h2>
-            <p>Get high quality, custom GFX designed to make your Roblox project stand out from the crowd.</p>
-            <a href="https://example.com/order" class="cta-button">Place Order</a>
+        <section id="order" class="reveal">
+            <div class="cta-glow-backdrop"></div>
+            <div class="cta-container">
+                <!-- Clean independent UI Content Panel -->
+                <div class="cta-panel">
+                    <span class="section-tag">04 / [ ORDER ]</span>
+                    <h2>Ready to Upgrade Your Roblox Visuals?</h2>
+                    <p>Get high quality, custom GFX designed to make your Roblox project stand out from the crowd.</p>
+                    <a href="https://example.com/order" class="cta-button magnetic">Place Order</a>
+                </div>
+                
+                <!-- Separate cinematic foreground layer outside the panel -->
+                <div class="cta-character-wrapper">
+                    <div class="cta-character-glow"></div>
+                    <img src="assets/images/5.png" alt="Roblox GFX Character Anchor" class="cta-character-img" loading="lazy">
+                </div>
+            </div>
         </section>
     </main>
 

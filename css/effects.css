@@ -8,23 +8,89 @@
     overflow: hidden;
     z-index: 1;
     background:
-        radial-gradient(circle at 30% 60%, rgba(75, 41, 240, 0.25), transparent 70%),
-        radial-gradient(circle at 70% 40%, rgba(41, 207, 240, 0.18), transparent 60%),
-        var(--bg-primary);
+        radial-gradient(ellipse 80% 55% at 50% 15%, rgba(255, 255, 255, 0.06), transparent 55%),
+        radial-gradient(circle at 20% 65%, rgba(14, 165, 233, 0.3), transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(56, 189, 248, 0.22), transparent 50%),
+        linear-gradient(180deg, #020617 0%, #0a1628 35%, #0f172a 70%, #0b1120 100%);
 }
 
 /* --- 4.2 Hero Section Polish --- */
 
 .hero-image img {
-    box-shadow: 0 10px 40px rgba(41, 207, 240, 0.15);
-    border: 1px solid var(--border-subtle);
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    filter: drop-shadow(0 15px 35px rgba(var(--brand-primary-rgb), 0.18)); /* High-end transparent character silhouette shadow glow */
+}
+
+.hero-logo {
+    filter: drop-shadow(0 10px 25px rgba(56, 189, 248, 0.18));
+    transition: filter 0.3s ease;
+}
+
+.hero-brand:hover .hero-logo {
+    filter: drop-shadow(0 12px 30px rgba(56, 189, 248, 0.35)) brightness(1.15);
 }
 
 /* --- 4.5 CTA Section Polish --- */
 #order {
-    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-surface) 100%);
+    background:
+        radial-gradient(ellipse 65% 50% at 50% 50%, rgba(255, 255, 255, 0.02), transparent 55%),
+        radial-gradient(circle at 50% 40%, rgba(14, 165, 233, 0.08), transparent 60%),
+        linear-gradient(180deg, #0f172a 0%, #0b1120 45%, #0f172a 100%);
     border-top: 1px solid var(--border-subtle);
     border-bottom: 1px solid var(--border-subtle);
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+}
+
+.cta-glow-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.04), transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cta-character-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(96, 165, 250, 0.05) 50%, transparent 100%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cta-character-img {
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.8));
+    position: relative;
+    z-index: 2;
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1), filter 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tablet visual scaling balance */
+@media (max-width: 1023px) {
+    .cta-character-img {
+        max-height: 380px;
+        margin-inline: auto;
+    }
+}
+
+/* Mobile visual scaling balance */
+@media (max-width: 767px) {
+    .cta-panel {
+        padding: 32px 20px;
+    }
+    .cta-character-img {
+        max-height: 280px;
+    }
 }
 
 /* --- Effect 3: Hover Glow Cards (Gallery) --- */
@@ -37,7 +103,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(41, 207, 240, 0.15), transparent 40%);
+    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(var(--brand-primary-rgb), 0.15), transparent 40%);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -64,16 +130,17 @@
 
 .feedbacks-section {
     background:
-        radial-gradient(circle at 70% 70%, rgba(240, 174, 41, 0.06), transparent 60%),
-        radial-gradient(circle at 20% 30%, rgba(41, 207, 240, 0.05), transparent 50%),
-        var(--bg-primary);
+        radial-gradient(ellipse 55% 45% at 55% 45%, rgba(255, 255, 255, 0.045), transparent 50%),
+        radial-gradient(circle at 75% 70%, rgba(56, 189, 248, 0.15), transparent 55%),
+        radial-gradient(circle at 15% 25%, rgba(14, 165, 233, 0.1), transparent 50%),
+        linear-gradient(180deg, #0b1120 0%, #0f172a 45%, #0b1120 100%);
 }
 
 .feedback-stars {
     font-size: 1.15rem;
     letter-spacing: 2px;
     color: var(--brand-primary);
-    filter: drop-shadow(0 0 4px rgba(240, 174, 41, 0.35));
+    filter: drop-shadow(0 0 4px rgba(var(--brand-primary-rgb), 0.35));
 }
 
 .feedback-text {

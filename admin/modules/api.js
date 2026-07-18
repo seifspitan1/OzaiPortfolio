@@ -6,9 +6,9 @@
 import { state, sanitizeNetworkState } from './state.js';
 import { updateSyncStatus } from './ui.module.js';
 
-const API_BASE = '../api';
-const ENDPOINT_SAVE = '/save.php';
-const ENDPOINT_LOAD = '/load.php';
+const API_BASE = '/api/v1';
+const ENDPOINT_SAVE = '/save';
+const ENDPOINT_LOAD = '/load';
 
 /* ── API Hardening Flags ───────────────────── */
 let isSaving = false;
@@ -74,6 +74,13 @@ export function isValidServerData(data) {
     return true;
 }
 
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 export async function saveToServer(payload) {
     if (isSaving) {
         console.warn('Save already in progress, skipping');
@@ -81,34 +88,49 @@ export async function saveToServer(payload) {
     }
 
     const payloadString = JSON.stringify(payload);
-    if (payloadString.length > 200 * 1024) { // 200KB limit check
-        console.error('Payload exceeds maximum size limit (200KB). Aborting network save to protect server.');
-        return null; // Will fallback gracefully offline
+    if (payloadString.length > 300 * 1024) { // Update to 300KB limit as per security review limit
+        console.error('Payload exceeds maximum size limit (300KB). Aborting network save to protect server.');
+        return null;
     }
 
     isSaving = true;
     console.log("PAYLOAD:", sanitizeNetworkState(state));
+
+    const idempotencyKey = generateUUID();
 
     for (let attempt = 0; attempt <= RETRY_LIMIT; attempt++) {
         try {
             const res = await fetch(API_BASE + ENDPOINT_SAVE, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Idempotency-Key': idempotencyKey
                 },
                 body: payloadString
             });
 
             if (res.status === 401) {
-                if (typeof Auth !== 'undefined') Auth.logout();
+                if (typeof Auth !== 'undefined') await Auth.logout();
                 window.location.href = 'login.html';
+                return null;
+            }
+
+            if (res.status === 409) {
+                const errData = await res.json();
+                alert(errData.error || 'Conflict: Outdated data. Page will reload.');
+                window.location.reload();
                 return null;
             }
 
             if (!res.ok) throw new Error('Save failed');
 
             isSaving = false;
-            return await res.json();
+            const resData = await res.json();
+            // Sync client lastModified with server timestamp
+            if (resData && resData.savedAt) {
+                state.lastModified = resData.savedAt;
+            }
+            return resData;
         } catch (err) {
             console.error(`API Save Error (attempt ${attempt + 1}/${RETRY_LIMIT + 1}):`, err);
 

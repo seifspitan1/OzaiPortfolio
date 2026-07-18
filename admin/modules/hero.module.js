@@ -52,10 +52,10 @@ export function initHero() {
 
                 setIsUploading(true);
                 try {
-                    const res = await fetch('../api/upload.php', { method: 'POST', body: formData });
+                    const res = await fetch('/api/v1/upload', { method: 'POST', body: formData });
                     
                     if (res.status === 401) {
-                        if (typeof Auth !== 'undefined') Auth.logout();
+                        if (typeof Auth !== 'undefined') await Auth.logout();
                         window.location.href = 'login.html';
                         return;
                     }

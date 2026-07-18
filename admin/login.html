@@ -21,16 +21,29 @@
             const errorMsg = document.getElementById('error-message');
 
             if (loginBtn) {
-                loginBtn.addEventListener('click', (e) => {
+                loginBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const username = usernameInput.value;
                     const password = passwordInput.value;
 
-                    if (Auth.login(username, password)) {
-                        window.location.href = 'index.html';
-                    } else {
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = 'Logging in...';
+                    errorMsg.style.display = 'none';
+
+                    try {
+                        const success = await Auth.login(username, password);
+                        if (success) {
+                            window.location.href = 'index.html';
+                        } else {
+                            errorMsg.style.display = 'block';
+                            errorMsg.textContent = 'Invalid credentials';
+                        }
+                    } catch (err) {
                         errorMsg.style.display = 'block';
-                        errorMsg.textContent = 'Invalid credentials';
+                        errorMsg.textContent = 'Login failed. Please try again.';
+                    } finally {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Login';
                     }
                 });
 

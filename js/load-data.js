@@ -1,6 +1,6 @@
 async function loadSiteData() {
     try {
-        const res = await fetch('api/load.php');
+        const res = await fetch('/api/v1/load');
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }

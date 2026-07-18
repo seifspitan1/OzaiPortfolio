@@ -83,23 +83,27 @@ window.renderFeedbacks = function(data) {
         const article = document.createElement('article');
         article.className = 'card feedback-card reveal';
         
+        // Stars Rating (Warm Gold)
         const stars = document.createElement('div');
         stars.className = 'feedback-stars';
         const rating = item.rating || 5;
         stars.setAttribute('aria-label', `${rating} out of 5 stars`);
         stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+        article.appendChild(stars);
         
+        // Testimonial Text (Italic Quote)
         const textElem = document.createElement('p');
         textElem.className = 'feedback-text';
         textElem.textContent = `"${item.text || ''}"`;
-        
-        const clientElem = document.createElement('span');
-        clientElem.className = 'feedback-client';
-        clientElem.textContent = `— ${item.clientName || 'Anonymous'}`;
-        
-        article.appendChild(stars);
         article.appendChild(textElem);
-        article.appendChild(clientElem);
+        
+        // Cyan Accent Client Name
+        const name = item.clientName || 'Anonymous';
+        const clientSpan = document.createElement('span');
+        clientSpan.className = 'feedback-client';
+        clientSpan.textContent = name;
+        article.appendChild(clientSpan);
+        
         container.appendChild(article);
     });
 };

@@ -1,74 +1,51 @@
 const Auth = {
-    login: function(username, password) {
-        if (username === 'admin' && password === 'admin123') {
-            const session = {
-                token: crypto.getRandomValues(new Uint32Array(1))[0].toString(36),
-                expiry: Date.now() + (60 * 60 * 1000) // 1 hour
-            };
-            localStorage.setItem('auth', JSON.stringify(session));
-            
-            // Synchronize session state to backend
-            fetch('../api/login.php', {
+    login: async function(username, password) {
+        try {
+            // Remove legacy localStorage auth items
+            localStorage.removeItem('auth');
+            localStorage.removeItem('adminAuth');
+
+            const res = await fetch('/api/v1/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
-            }).catch(err => console.error("Session sync failed", err));
-
-            return true;
+            });
+            const data = await res.json();
+            return !!data.success;
+        } catch (err) {
+            console.error("Login failed", err);
+            return false;
         }
-        return false;
     },
     
-    logout: function() {
+    logout: async function() {
         localStorage.removeItem('auth');
-        localStorage.removeItem('adminAuth'); // Ensure legacy data is also wiped
-        fetch('../api/logout.php', { method: 'POST' }).catch(() => {});
+        localStorage.removeItem('adminAuth');
+        try {
+            await fetch('/api/v1/logout', { method: 'POST' });
+        } catch (err) {
+            console.error("Logout failed", err);
+        }
     },
 
     isAuthenticated: function() {
-        const authData = localStorage.getItem('auth');
-        
-        if (!authData) return false;
-        
-        // Handle backward compatibility -> treat 'true' string as invalid
-        if (authData === 'true') {
-            this.logout();
-            return false;
-        }
-        
         try {
-            const session = JSON.parse(authData);
-            
-            if (!session || !session.expiry || Date.now() > session.expiry) {
-                this.logout();
-                return false;
+            // Clean up any legacy items
+            if (localStorage.getItem('auth') || localStorage.getItem('adminAuth')) {
+                localStorage.removeItem('auth');
+                localStorage.removeItem('adminAuth');
             }
-            
-            return true;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/v1/session', false); // Synchronous XHR to block rendering before status is resolved
+            xhr.send();
+            if (xhr.status === 200) {
+                const res = JSON.parse(xhr.responseText);
+                return !!res.authenticated;
+            }
         } catch (e) {
-            // Fallback for any JSON parsing errors
-            this.logout();
-            return false;
+            console.error('Session check failed', e);
         }
+        return false;
     }
 };
-
-// Activity-based session refresh
-function refreshSession() {
-    const raw = localStorage.getItem('auth');
-    if (!raw) return;
-
-    try {
-        const data = JSON.parse(raw);
-        // Only refresh if already valid (has expiry)
-        if (data && data.expiry) {
-            data.expiry = Date.now() + (60 * 60 * 1000);
-            localStorage.setItem('auth', JSON.stringify(data));
-        }
-    } catch {
-        // ignore invalid data
-    }
-}
-
-document.addEventListener('click', refreshSession);
-document.addEventListener('keydown', refreshSession);
