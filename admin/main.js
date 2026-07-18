@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const serverTS = (serverData && isValidServerData(serverData)) ? (serverData.lastModified || 0) : 0;
             const localTS = (localData && localData.data) ? (localData.lastModified || 0) : 0;
 
-            if (serverTS >= localTS && serverTS > 0) {
+            if (serverData && isValidServerData(serverData) && serverTS >= localTS) {
                 console.log('Server data is the source of truth (equal or newer):', serverData);
                 state.hero = { ...state.hero, ...serverData.data.hero };
                 state.portfolio.length = 0;
