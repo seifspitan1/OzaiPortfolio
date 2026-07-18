@@ -110,7 +110,7 @@ BEGIN
     END IF;
 
     -- Update/Insert Hero Configuration
-    DELETE FROM hero_settings;
+    DELETE FROM hero_settings WHERE TRUE;
     INSERT INTO hero_settings (id, image_url)
     VALUES (
         COALESCE((hero_input->>'id')::UUID, uuid_generate_v4()),
@@ -118,7 +118,7 @@ BEGIN
     );
 
     -- Sync Portfolio Projects
-    DELETE FROM portfolio_projects;
+    DELETE FROM portfolio_projects WHERE TRUE;
     INSERT INTO portfolio_projects (id, sort_order, title, description, link_url, image_url)
     SELECT 
         COALESCE((elem->>'id')::UUID, uuid_generate_v4()),
@@ -130,7 +130,7 @@ BEGIN
     FROM jsonb_array_elements(portfolio_input) AS elem;
 
     -- Sync Client Feedbacks
-    DELETE FROM client_feedbacks;
+    DELETE FROM client_feedbacks WHERE TRUE;
     INSERT INTO client_feedbacks (id, sort_order, client_name, feedback_text, rating)
     SELECT 
         COALESCE((elem->>'id')::UUID, uuid_generate_v4()),
