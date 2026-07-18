@@ -24,6 +24,7 @@ export function setIsUploading(val) {
 
 let isSyncing = false;
 let pendingSync = false;
+let lastSuccessfulPayloadDataStr = null;
 
 export function clearPendingSync() {
     pendingSync = false;
@@ -35,22 +36,61 @@ export function requestSync() {
     processQueue();
 }
 
+function isValidPayload(payload) {
+    if (!payload || !payload.data) return false;
+    const hero = payload.data.hero;
+    if (!hero || !hero.imageUrl || hero.imageUrl.trim() === '') {
+        return false;
+    }
+    const portfolio = payload.data.portfolio;
+    if (Array.isArray(portfolio)) {
+        for (const item of portfolio) {
+            if (!item.imageUrl || item.imageUrl.trim() === '') {
+                return false;
+            }
+        }
+    }
+    const feedbacks = payload.data.feedbacks;
+    if (Array.isArray(feedbacks)) {
+        for (const item of feedbacks) {
+            if (!item.clientName || item.clientName.trim() === '') return false;
+            if (!item.text || item.text.trim() === '') return false;
+            if (typeof item.rating !== 'number' || item.rating < 1 || item.rating > 5) return false;
+        }
+    }
+    return true;
+}
+
 async function processQueue() {
     if (isSyncing) return;
     if (!pendingSync) return;
     if (isUploading) return;
 
+    const payload = { version: 2, lastModified: state.lastModified || Date.now(), data: sanitizeNetworkState(state) };
+
+    if (!isValidPayload(payload)) {
+        console.warn('Skipping server sync: state payload contains missing or invalid required fields.');
+        return;
+    }
+
+    const currentPayloadDataStr = JSON.stringify(payload.data);
+    if (currentPayloadDataStr === lastSuccessfulPayloadDataStr) {
+        console.log('Skipping sync: payload data is identical to the last successful sync.');
+        pendingSync = false;
+        return;
+    }
+
     isSyncing = true;
     pendingSync = false;
 
     updateSyncStatus('Syncing...', 'syncing');
-    const payload = { version: 2, lastModified: state.lastModified || Date.now(), data: sanitizeNetworkState(state) };
     
     console.log("SYNC PAYLOAD:", payload);
 
     const res = await saveToServer(payload);
     
     if (res && res.success) {
+        lastSuccessfulPayloadDataStr = currentPayloadDataStr;
         updateSyncStatus('All changes saved', 'success', true);
     } else {
         updateSyncStatus('Sync failed', 'error');
@@ -122,7 +162,15 @@ export async function saveToServer(payload) {
                 return null;
             }
 
-            if (!res.ok) throw new Error('Save failed');
+            if (!res.ok) {
+                if (res.status >= 500 && res.status < 600) {
+                    throw new Error(`Server error: ${res.status}`);
+                } else {
+                    console.error(`Non-retryable HTTP error ${res.status}`);
+                    isSaving = false;
+                    return null;
+                }
+            }
 
             isSaving = false;
             const resData = await res.json();
@@ -161,6 +209,9 @@ export async function loadFromServer() {
         if (!res.ok) throw new Error('Load failed');
 
         const serverData = await res.json();
+        if (serverData && serverData.data) {
+            lastSuccessfulPayloadDataStr = JSON.stringify(serverData.data);
+        }
         return serverData;
     } catch (err) {
         if (err.name === 'AbortError') {

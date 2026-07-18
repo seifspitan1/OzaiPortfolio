@@ -71,13 +71,11 @@ export function initHero() {
                         throw new Error("Invalid JSON");
                     }
 
-                    console.log("SERVER RESPONSE:", data);
-
                     if (!data.success || !data.url) {
                         throw new Error(data.error || "Upload failed");
                     }
 
-                    console.log("SETTING STATE: Hero", data.url);
+                    console.log("SERVER RESPONSE:", data);
 
                     state.hero = {
                         ...state.hero,

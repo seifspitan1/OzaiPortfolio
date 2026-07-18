@@ -96,6 +96,8 @@ async function uploadHandler(req, res) {
     const user = verifyAuth(req);
     logger.info('Upload image request authenticated', { username: user.username });
 
+
+
     // 2. Parse Multipart request
     const filePayload = await parseMultipart(req);
 
