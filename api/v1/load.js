@@ -39,7 +39,8 @@ async function loadHandler(req, res) {
         title: p.title || '',
         description: p.description || '',
         link: p.link_url || '',
-        imageUrl: p.image_url
+        imageUrl: p.image_url,
+        section: p.section || 'Section 1'
     }));
 
     const feedbacks = (feedbacksRes.data || []).map(f => ({

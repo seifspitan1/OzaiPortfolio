@@ -13,7 +13,8 @@
                 "title": "test",
                 "description": "",
                 "link": "",
-                "imageUrl": "uploads\/6a116f690ed65.png"
+                "imageUrl": "uploads\/6a116f690ed65.png",
+                "section": "Section 1"
             },
             {
                 "id": "be47cbab-4ae5-4524-9255-d622ebf33010",
@@ -21,7 +22,8 @@
                 "title": "",
                 "description": "",
                 "link": "",
-                "imageUrl": "uploads\/6a56f13d350b6.png"
+                "imageUrl": "uploads\/6a56f13d350b6.png",
+                "section": "Section 2"
             }
         ],
         "feedbacks": [

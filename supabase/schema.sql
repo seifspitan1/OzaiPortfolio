@@ -42,6 +42,7 @@ CREATE TABLE portfolio_projects (
     description TEXT DEFAULT '',
     link_url TEXT DEFAULT '',
     image_url TEXT NOT NULL,
+    section TEXT DEFAULT 'Section 1',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -119,14 +120,15 @@ BEGIN
 
     -- Sync Portfolio Projects
     DELETE FROM portfolio_projects WHERE TRUE;
-    INSERT INTO portfolio_projects (id, sort_order, title, description, link_url, image_url)
+    INSERT INTO portfolio_projects (id, sort_order, title, description, link_url, image_url, section)
     SELECT 
         COALESCE((elem->>'id')::UUID, uuid_generate_v4()),
         (elem->>'order')::INTEGER,
         COALESCE(elem->>'title', ''),
         COALESCE(elem->>'description', ''),
         COALESCE(elem->>'link', ''),
-        elem->>'imageUrl'
+        elem->>'imageUrl',
+        COALESCE(elem->>'section', 'Section 1')
     FROM jsonb_array_elements(portfolio_input) AS elem;
 
     -- Sync Client Feedbacks

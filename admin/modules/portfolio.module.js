@@ -69,6 +69,11 @@ export async function renderPortfolio() {
             portfolioContainer.insertBefore(card, portfolioContainer.children[index]);
         }
 
+        const sectionNode = card.querySelector('.project-section');
+        if (sectionNode && sectionNode.value !== (proj.section || 'Section 1')) {
+            sectionNode.value = proj.section || 'Section 1';
+        }
+
         const titleNode = card.querySelector('.project-title');
         if (titleNode && titleNode.value !== proj.title) titleNode.value = proj.title;
 
@@ -90,7 +95,7 @@ export function initPortfolio() {
 
     if (!addProjectBtn || !portfolioContainer || !projectTpl) return;
 
-    portfolioContainer.addEventListener('input', e => {
+    const handleInputOrChange = e => {
         const card = e.target.closest('.item-card');
         if (!card || !card.dataset.id) return;
         const proj = state.portfolio.find(p => p.id === card.dataset.id);
@@ -102,9 +107,14 @@ export function initPortfolio() {
             proj.link = e.target.value;
         } else if (e.target.classList.contains('project-description')) {
             proj.description = e.target.value;
+        } else if (e.target.classList.contains('project-section')) {
+            proj.section = e.target.value;
         }
         markDirty();
-    });
+    };
+
+    portfolioContainer.addEventListener('input', handleInputOrChange);
+    portfolioContainer.addEventListener('change', handleInputOrChange);
 
     portfolioContainer.addEventListener('click', async (e) => {
         const card = e.target.closest('.item-card');
@@ -229,7 +239,8 @@ export function initPortfolio() {
             description: '',
             link: '',
             image: '',
-            imageId: ''
+            imageId: '',
+            section: 'Section 1'
         });
         _renderHash.portfolio = '';
         renderPortfolio();
