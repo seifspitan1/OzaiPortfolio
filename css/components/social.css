@@ -70,23 +70,8 @@
 }
 
 /* ========================================
-   HERO HORIZONTAL FLOATING SOCIAL LINKS (52x52px)
+   HERO FLOATING SOCIAL LINKS (52x52px)
    ======================================== */
-
-.hero-social-links {
-    position: absolute;
-    top: -60px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    z-index: 15;
-    white-space: nowrap;
-    animation: heroFloatHorizontal 6s ease-in-out infinite alternate;
-}
 
 .hero-social-links .social-icon {
     width: 52px;
@@ -98,29 +83,65 @@
     transform: translateY(-4px) scale(1.08) !important;
 }
 
-/* 6s Slow Floating Horizontal Group Animation */
-@keyframes heroFloatHorizontal {
+/* Desktop (≥ 1024px) - Positioned 15px down inside media column (0px layout flow impact) */
+@media (min-width: 1024px) {
+    .hero-social-links {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        z-index: 15;
+        white-space: nowrap;
+        margin-top: 0;
+        margin-bottom: 0;
+        animation: heroFloatAbsolute 6s ease-in-out infinite alternate;
+    }
+}
+
+@keyframes heroFloatAbsolute {
     0% {
         transform: translate(-50%, 0px);
     }
     100% {
-        transform: translate(-50%, -7px);
+        transform: translate(-50%, -6px);
     }
 }
 
-/* Tablet Breakpoint (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .hero-social-links {
-        top: -50px;
-        gap: 18px;
+/* Tablet & Mobile (< 1023px) - Normal Flex Flow Stacking directly above Image */
+@media (max-width: 1023px) {
+    .hero-image {
+        flex-direction: column;
     }
-}
 
-/* Mobile Breakpoint (< 767px) */
-@media (max-width: 767px) {
     .hero-social-links {
-        top: -45px;
+        position: static;
+        top: auto;
+        left: auto;
+        transform: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
         gap: 16px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        z-index: 5;
+        flex-wrap: wrap;
+        animation: heroFloatStatic 6s ease-in-out infinite alternate;
+    }
+}
+
+@keyframes heroFloatStatic {
+    0% {
+        transform: translateY(0px);
+    }
+    100% {
+        transform: translateY(-6px);
     }
 }
 
