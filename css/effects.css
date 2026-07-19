@@ -20,7 +20,8 @@
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
-    filter: drop-shadow(0 15px 35px rgba(var(--brand-primary-rgb), 0.18)); /* High-end transparent character silhouette shadow glow */
+    filter: drop-shadow(0 15px 35px rgba(var(--brand-primary-rgb), 0.18));
+    /* High-end transparent character silhouette shadow glow */
 }
 
 .hero-logo {
@@ -88,6 +89,7 @@
     .cta-panel {
         padding: 32px 20px;
     }
+
     .cta-character-img {
         max-height: 280px;
     }

@@ -114,12 +114,6 @@
 @media (min-width: 768px) and (max-width: 1023px) {
 
     /* Adjust grid for mid-sized screens to prevent stretching or squishing */
-    .card-group {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-md);
-    }
-
     .gallery {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -225,9 +219,9 @@
 
     /* --- Commissions Desktop --- */
     .card-group {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-lg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     /* --- Portfolio Desktop --- */
@@ -258,10 +252,12 @@
         position: relative;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start; /* Place panel left, character right absolute */
+        justify-content: flex-start;
+        /* Place panel left, character right absolute */
         max-width: 1200px;
         margin-inline: auto;
-        min-height: 480px; /* Give the container nice vertical presence */
+        min-height: 480px;
+        /* Give the container nice vertical presence */
     }
 
     .cta-panel {
@@ -275,27 +271,35 @@
 
     .cta-character-wrapper {
         position: absolute;
-        right: -40px; /* Breakout outside right container boundary */
-        bottom: -90px; /* Breakout outside bottom section boundary */
-        top: -60px; /* Breakout outside top section boundary */
-        width: 48%; /* Visually independent scaling */
+        right: -40px;
+        /* Breakout outside right container boundary */
+        bottom: -90px;
+        /* Breakout outside bottom section boundary */
+        top: -60px;
+        /* Breakout outside top section boundary */
+        width: 48%;
+        /* Visually independent scaling */
         height: auto;
         display: flex;
         justify-content: flex-end;
         align-items: flex-end;
-        pointer-events: none; /* Let clicks pass to background elements if needed */
-        z-index: 10; /* Foreground overlay layers */
+        pointer-events: none;
+        /* Let clicks pass to background elements if needed */
+        z-index: 10;
+        /* Foreground overlay layers */
     }
 
     .cta-character-img {
-        max-height: 600px; /* Make it large, larger than panel height */
+        max-height: 600px;
+        /* Make it large, larger than panel height */
         width: auto;
         height: auto;
         transform: translateY(0) scale(1);
     }
-    
+
     #order:hover .cta-character-img {
-        transform: translateY(-12px) scale(1.03); /* Foreground atmospheric lift */
+        transform: translateY(-12px) scale(1.03);
+        /* Foreground atmospheric lift */
         filter: drop-shadow(0 35px 60px rgba(56, 189, 248, 0.15)) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));
     }
 }

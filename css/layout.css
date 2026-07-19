@@ -63,9 +63,10 @@
 /* --- 3.4 Commissions --- */
 .card-group {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    margin-top: var(--space-md);
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--space-lg);
+    width: 100%;
 }
 
 .card {
