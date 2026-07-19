@@ -1,0 +1,75 @@
+/* ========================================
+   SHARED SOCIAL LINKS COMPONENT
+   ======================================== */
+
+.social-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.social-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.social-icon svg {
+    display: block;
+    fill: currentColor;
+    transition: fill 0.3s ease;
+}
+
+/* Base Hover Motion */
+.social-icon:hover {
+    transform: translateY(-3px) scale(1.08);
+}
+
+/* Discord Hover Effect */
+.social-icon.social-discord:hover {
+    color: #5865F2;
+    background: rgba(88, 101, 242, 0.12);
+    border-color: rgba(88, 101, 242, 0.6);
+    box-shadow: 0 0 15px rgba(88, 101, 242, 0.4),
+                0 0 30px rgba(88, 101, 242, 0.2);
+}
+
+/* X (Twitter) Hover Effect */
+.social-icon.social-x:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4),
+                0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+/* Roblox Hover Effect */
+.social-icon.social-roblox:hover {
+    color: #62F3FF;
+    background: rgba(98, 243, 255, 0.12);
+    border-color: rgba(98, 243, 255, 0.6);
+    box-shadow: 0 0 15px rgba(98, 243, 255, 0.4),
+                0 0 30px rgba(98, 243, 255, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .social-icon {
+        transition: none;
+    }
+}
