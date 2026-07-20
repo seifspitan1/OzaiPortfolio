@@ -186,7 +186,7 @@ window.renderFeedbacks = function (data) {
 
             const imgIndicator = document.createElement('div');
             imgIndicator.className = 'feedback-image-indicator';
-            imgIndicator.textContent = 'VIEW IMAGE';
+            imgIndicator.textContent = 'VIEW FEEDBACK';
             article.appendChild(imgIndicator);
         }
 
