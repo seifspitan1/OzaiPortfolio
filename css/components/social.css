@@ -73,6 +73,19 @@
    HERO HORIZONTAL FLOATING SOCIAL LINKS (52x52px)
    ======================================== */
 
+.hero-social-links {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 24px;
+    margin-bottom: 0;
+    z-index: 15;
+    white-space: nowrap;
+    animation: heroFloatMobile 6s ease-in-out infinite alternate;
+}
+
 .hero-social-links .social-icon {
     width: 52px;
     height: 52px;
@@ -83,60 +96,10 @@
     transform: translateY(-4px) scale(1.08) !important;
 }
 
-/* Desktop Only (≥ 1025px): Absolute Floating Position */
-@media (min-width: 1025px) {
-    .hero-social-links {
-        position: absolute;
-        top: -60px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        z-index: 15;
-        white-space: nowrap;
-        animation: heroFloatHorizontal 6s ease-in-out infinite alternate;
-    }
-}
-
-@keyframes heroFloatHorizontal {
-    0% {
-        transform: translate(-50%, 0px);
-    }
-    100% {
-        transform: translate(-50%, -7px);
-    }
-}
-
-/* Mobile & Tablet Only (≤ 1024px): Normal Document Flow Above Hero Media */
 @media (max-width: 1024px) {
-    .hero-image {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        position: relative;
-    }
-
     .hero-social-links {
-        position: static;
-        top: auto;
-        left: auto;
-        right: auto;
-        transform: none;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
         gap: 18px;
-        margin-top: 0;
-        margin-bottom: 24px;
-        width: 100%;
-        z-index: 15;
-        white-space: nowrap;
-        animation: heroFloatMobile 6s ease-in-out infinite alternate;
+        margin-top: 20px;
     }
 }
 
