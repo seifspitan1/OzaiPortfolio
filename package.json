@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "@vercel/analytics": "^2.0.1",
     "busboy": "^1.6.0",
     "cookie": "^0.6.0",
     "express": "^5.2.1",
