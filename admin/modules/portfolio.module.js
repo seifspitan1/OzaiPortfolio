@@ -77,6 +77,9 @@ export async function renderPortfolio() {
         const titleNode = card.querySelector('.project-title');
         if (titleNode && titleNode.value !== proj.title) titleNode.value = proj.title;
 
+        const linkNode = card.querySelector('.project-link');
+        if (linkNode && linkNode.value !== (proj.link || '')) linkNode.value = proj.link || '';
+
         const descNode = card.querySelector('.project-description');
         if (descNode && descNode.value !== proj.description) descNode.value = proj.description || '';
 
@@ -100,6 +103,8 @@ export function initPortfolio() {
 
         if (e.target.classList.contains('project-title')) {
             proj.title = e.target.value;
+        } else if (e.target.classList.contains('project-link')) {
+            proj.link = e.target.value;
         } else if (e.target.classList.contains('project-description')) {
             proj.description = e.target.value;
         } else if (e.target.classList.contains('project-section')) {
@@ -232,6 +237,7 @@ export function initPortfolio() {
             order: state.portfolio.length + 1,
             title: '',
             description: '',
+            link: '',
             image: '',
             imageId: '',
             section: 'Section 1'

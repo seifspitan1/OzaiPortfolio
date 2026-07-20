@@ -38,6 +38,7 @@ async function loadHandler(req, res) {
         order: p.sort_order,
         title: p.title || '',
         description: p.description || '',
+        link: p.link_url || '',
         imageUrl: p.image_url,
         section: p.section || 'Section 1'
     }));

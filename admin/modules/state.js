@@ -46,6 +46,7 @@ export function sanitizeNetworkState(stateObj) {
             order: p.order || 0,
             title: p.title || '',
             description: p.description || '',
+            link: p.link || '',
             imageUrl: p.imageUrl || '',
             section: p.section || 'Section 1'
         };
