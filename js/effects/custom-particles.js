@@ -5,7 +5,7 @@ class ParticleSystem {
 
         this.targetDensity = 8;
         this.activeParticles = 0;
-        this.assetPath = 'assets/images/10.png';
+        this.assetPath = '/assets/images/10.png';
         this.recentZones = [];
 
         // Interactive rendering states
