@@ -128,7 +128,7 @@ BEGIN
         COALESCE(elem->>'description', ''),
         COALESCE(elem->>'link', ''),
         elem->>'imageUrl',
-        COALESCE(elem->>'section', 'Section 1')
+        COALESCE(NULLIF(elem->>'section', ''), 'Section 1')
     FROM jsonb_array_elements(portfolio_input) AS elem;
 
     -- Sync Client Feedbacks
