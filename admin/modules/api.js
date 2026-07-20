@@ -77,6 +77,7 @@ async function processQueue() {
     if (currentPayloadDataStr === lastSuccessfulPayloadDataStr) {
         console.log('Skipping sync: payload data is identical to the last successful sync.');
         pendingSync = false;
+        updateSyncStatus('All changes saved', 'success', true);
         return;
     }
 

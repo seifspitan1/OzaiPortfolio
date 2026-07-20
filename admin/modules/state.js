@@ -22,7 +22,7 @@ export function _hashHero() {
 }
 
 export function _hashPortfolio() {
-    return state.portfolio.map(p => `${p.order}|${p.title}|${p.link}|${p.imageUrl || p.image || ''}`).join(';;');
+    return state.portfolio.map(p => `${p.order}|${p.title}|${p.link}|${p.section || 'Section 1'}|${p.imageUrl || p.image || ''}`).join(';;');
 }
 
 export function _hashFeedbacks() {
@@ -47,7 +47,8 @@ export function sanitizeNetworkState(stateObj) {
             title: p.title || '',
             description: p.description || '',
             link: p.link || '',
-            imageUrl: p.imageUrl || ''
+            imageUrl: p.imageUrl || '',
+            section: p.section || 'Section 1'
         };
     });
 
