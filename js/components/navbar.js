@@ -1,27 +1,28 @@
 /* --- 0. Dynamic Navbar Scroll Shrink --- */
 export function initDynamicNavbar() {
     const nav = document.querySelector('nav');
-    const hero = document.querySelector('#hero');
-    if (!nav || !hero) return;
+    if (!nav) return;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+    // Publish initial navbar height as a CSS custom property
+    document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
 
-            if (entry.isIntersecting) {
-                // نحن داخل الهيرو → الزر بحجمه الطبيعي
-                nav.classList.remove('scrolled');
-            } else {
-                // خرجنا من الهيرو → الزر يصغر
+    function updateNavState() {
+        const isScrolled = window.scrollY > 50;
+        if (isScrolled !== nav.classList.contains('scrolled')) {
+            if (isScrolled) {
                 nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
             }
+            document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+            setTimeout(() => {
+                document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+            }, 420); // slightly after the 400ms min-height transition
+        }
+    }
 
-        });
-    }, {
-        root: null,
-        threshold: 0
-    });
-
-    observer.observe(hero);
+    window.addEventListener('scroll', updateNavState, { passive: true });
+    updateNavState();
 }
 
 /* --- 1. Mobile Navigation Toggle --- */

@@ -38,7 +38,6 @@ async function loadHandler(req, res) {
         order: p.sort_order,
         title: p.title || '',
         description: p.description || '',
-        link: p.link_url || '',
         imageUrl: p.image_url,
         section: p.section || 'Section 1'
     }));
@@ -48,7 +47,8 @@ async function loadHandler(req, res) {
         order: f.sort_order,
         clientName: f.client_name,
         text: f.feedback_text,
-        rating: f.rating
+        rating: f.rating,
+        imageUrl: f.image_url || ''
     }));
 
     const lastModified = metadataRes.data ? parseInt(metadataRes.data.value, 10) : 0;
@@ -63,12 +63,12 @@ async function loadHandler(req, res) {
         }
     };
 
-    logger.info('Load data completed successfully.', { 
-        portfolioCount: portfolio.length, 
-        feedbackCount: feedbacks.length, 
-        lastModified 
+    logger.info('Load data completed successfully.', {
+        portfolioCount: portfolio.length,
+        feedbackCount: feedbacks.length,
+        lastModified
     });
-    
+
     res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     return res.status(200).json(responsePayload);
 }

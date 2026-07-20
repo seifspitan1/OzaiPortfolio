@@ -55,6 +55,7 @@ CREATE TABLE client_feedbacks (
     client_name TEXT NOT NULL,
     feedback_text TEXT NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    image_url TEXT DEFAULT '',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -133,13 +134,14 @@ BEGIN
 
     -- Sync Client Feedbacks
     DELETE FROM client_feedbacks WHERE TRUE;
-    INSERT INTO client_feedbacks (id, sort_order, client_name, feedback_text, rating)
+    INSERT INTO client_feedbacks (id, sort_order, client_name, feedback_text, rating, image_url)
     SELECT 
         COALESCE((elem->>'id')::UUID, uuid_generate_v4()),
         (elem->>'order')::INTEGER,
         elem->>'clientName',
         elem->>'text',
-        (elem->>'rating')::INTEGER
+        (elem->>'rating')::INTEGER,
+        COALESCE(elem->>'imageUrl', '')
     FROM jsonb_array_elements(feedbacks_input) AS elem;
 
     -- Generate new epoch millisecond timestamp

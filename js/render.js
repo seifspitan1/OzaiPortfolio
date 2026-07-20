@@ -1,18 +1,18 @@
-window.getAbsoluteImageUrl = function(storedPath) {
+window.getAbsoluteImageUrl = function (storedPath) {
     if (!storedPath) return '';
     if (storedPath.startsWith('http://') || storedPath.startsWith('https://')) return storedPath;
-    
+
     if (storedPath.startsWith('/uploads/')) {
         storedPath = storedPath.substring(1);
     }
-    
+
     const pathname = window.location.pathname;
     let basePath = pathname.replace(/\/[^\/]*$/, '');
-    
+
     return window.location.origin + basePath + '/' + storedPath;
 };
 
-window.renderHero = function(data) {
+window.renderHero = function (data) {
     if (!data || !data.hero) return;
     const heroImg = document.querySelector('.hero-image img');
     if (heroImg) {
@@ -25,9 +25,9 @@ window.renderHero = function(data) {
     }
 };
 
-window.renderPortfolio = function(data) {
+window.renderPortfolio = function (data) {
     if (!data || !data.portfolio) return;
-    
+
     const galleries = document.querySelectorAll('.gallery');
     if (galleries.length === 0) return;
 
@@ -59,11 +59,8 @@ window.renderPortfolio = function(data) {
             }
 
             items.forEach(item => {
-                const linkElem = document.createElement('a');
-                linkElem.href = item.link || '#';
-                linkElem.className = 'gallery-item reveal';
-                linkElem.target = '_blank';
-                linkElem.rel = 'noopener';
+                const itemElem = document.createElement('div');
+                itemElem.className = 'gallery-item reveal';
 
                 const imgElem = document.createElement('img');
                 if (item.imageUrl) {
@@ -79,12 +76,12 @@ window.renderPortfolio = function(data) {
                 textElem.textContent = item.title || 'Untitled';
 
                 if (item.description) {
-                    linkElem.title = item.description;
+                    itemElem.title = item.description;
                 }
 
-                linkElem.appendChild(imgElem);
-                linkElem.appendChild(textElem);
-                gallery.appendChild(linkElem);
+                itemElem.appendChild(imgElem);
+                itemElem.appendChild(textElem);
+                gallery.appendChild(itemElem);
             });
         });
     } else {
@@ -95,11 +92,8 @@ window.renderPortfolio = function(data) {
         }
 
         data.portfolio.forEach(item => {
-            const linkElem = document.createElement('a');
-            linkElem.href = item.link || '#';
-            linkElem.className = 'gallery-item reveal';
-            linkElem.target = '_blank';
-            linkElem.rel = 'noopener';
+            const itemElem = document.createElement('div');
+            itemElem.className = 'gallery-item reveal';
 
             const imgElem = document.createElement('img');
             if (item.imageUrl) {
@@ -115,30 +109,30 @@ window.renderPortfolio = function(data) {
             textElem.textContent = item.title || 'Untitled';
 
             if (item.description) {
-                linkElem.title = item.description;
+                itemElem.title = item.description;
             }
 
-            linkElem.appendChild(imgElem);
-            linkElem.appendChild(textElem);
-            container.appendChild(linkElem);
+            itemElem.appendChild(imgElem);
+            itemElem.appendChild(textElem);
+            container.appendChild(itemElem);
         });
     }
 };
 
-window.renderFeedbacks = function(data) {
+window.renderFeedbacks = function (data) {
     if (!data || !data.feedbacks) return;
     const container = document.querySelector('.feedback-grid');
     if (!container) return;
-    
+
     // Clear existing
     while (container.firstChild) {
         container.removeChild(container.firstChild);
     }
-    
+
     data.feedbacks.forEach(item => {
         const article = document.createElement('article');
         article.className = 'card feedback-card reveal';
-        
+
         // Stars Rating (Warm Gold)
         const stars = document.createElement('div');
         stars.className = 'feedback-stars';
@@ -146,20 +140,30 @@ window.renderFeedbacks = function(data) {
         stars.setAttribute('aria-label', `${rating} out of 5 stars`);
         stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
         article.appendChild(stars);
-        
+
         // Testimonial Text (Italic Quote)
         const textElem = document.createElement('p');
         textElem.className = 'feedback-text';
         textElem.textContent = `"${item.text || ''}"`;
         article.appendChild(textElem);
-        
+
         // Cyan Accent Client Name
         const name = item.clientName || 'Anonymous';
         const clientSpan = document.createElement('span');
         clientSpan.className = 'feedback-client';
         clientSpan.textContent = name;
         article.appendChild(clientSpan);
-        
+
+        if (item.imageUrl) {
+            article.classList.add('has-image');
+            article.dataset.imageUrl = window.getAbsoluteImageUrl(item.imageUrl);
+
+            const imgIndicator = document.createElement('div');
+            imgIndicator.className = 'feedback-image-indicator';
+            imgIndicator.innerHTML = '🖼️ View Attachment';
+            article.appendChild(imgIndicator);
+        }
+
         container.appendChild(article);
     });
 };

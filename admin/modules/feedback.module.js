@@ -4,6 +4,8 @@
 
 import { state, _renderHash, _hashFeedbacks } from './state.js';
 import { markDirty } from './storage.js';
+import { setIsUploading, requestSync } from './api.js';
+import { getAbsoluteImageUrl, updateSyncStatus } from './ui.module.js';
 
 let feedbackContainer = null;
 let feedbackTpl = null;
@@ -51,7 +53,7 @@ export function renderFeedbacks() {
 
     state.feedbacks.forEach((fb, index) => {
         let card = domNodes.get(fb.id);
-        
+
         if (!card) {
             const clone = feedbackTpl.content.cloneNode(true);
             card = clone.querySelector('.item-card');
@@ -79,6 +81,24 @@ export function renderFeedbacks() {
 
         const orderNode = card.querySelector('.item-index');
         if (orderNode && orderNode.textContent != fb.order) orderNode.textContent = fb.order;
+
+        const imgNode = card.querySelector('.feedbackPreview');
+        const fileNameNode = card.querySelector('.feedback-file-name');
+        const deleteImgBtn = card.querySelector('.delete-feedback-image');
+        if (imgNode) {
+            const newSrc = fb.imageUrl ? getAbsoluteImageUrl(fb.imageUrl) : '';
+            if (newSrc) {
+                imgNode.src = newSrc;
+                imgNode.style.display = 'block';
+                if (fileNameNode) fileNameNode.textContent = fb.imageUrl.split('/').pop();
+                if (deleteImgBtn) deleteImgBtn.style.display = 'inline-block';
+            } else {
+                imgNode.src = '';
+                imgNode.style.display = 'none';
+                if (fileNameNode) fileNameNode.textContent = 'No file selected';
+                if (deleteImgBtn) deleteImgBtn.style.display = 'none';
+            }
+        }
     });
 }
 
@@ -138,11 +158,11 @@ export function initFeedbacks() {
             if (!card || !card.dataset.id) return;
             const fb = state.feedbacks.find(f => f.id === card.dataset.id);
             if (!fb) return;
-            
+
             const spanIndex = parseInt(span.dataset.index);
             const rect = span.getBoundingClientRect();
             const isHalf = (e.clientX - rect.left) < (rect.width / 2);
-            
+
             const newRating = isHalf ? spanIndex - 0.5 : spanIndex;
             if (fb.rating === newRating) return;
             fb.rating = newRating;
@@ -168,6 +188,12 @@ export function initFeedbacks() {
             _renderHash.feedbacks = '';
             renderFeedbacks();
             markDirty();
+        } else if (e.target.closest('.delete-feedback-image')) {
+            state.feedbacks[fbIndex].imageUrl = '';
+            _renderHash.feedbacks = '';
+            renderFeedbacks();
+            markDirty();
+            requestSync();
         } else if (e.target.closest('.move-up') && fbIndex > 0) {
             const temp = state.feedbacks[fbIndex];
             state.feedbacks[fbIndex] = state.feedbacks[fbIndex - 1];
@@ -187,13 +213,70 @@ export function initFeedbacks() {
         }
     });
 
+    feedbackContainer.addEventListener('change', e => {
+        if (e.target.classList.contains('feedbackImageUpload')) {
+            const card = e.target.closest('.item-card');
+            if (!card || !card.dataset.id) return;
+            const cardId = card.dataset.id;
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const base64 = ev.target.result;
+                const imgNode = card.querySelector('.feedbackPreview');
+                const previousSrc = imgNode ? imgNode.src : '';
+                if (imgNode) {
+                    imgNode.src = base64;
+                    imgNode.style.display = 'block';
+                }
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                setIsUploading(true);
+                try {
+                    const res = await fetch('/api/v1/upload', { method: 'POST', body: formData });
+                    if (res.status === 401) {
+                        if (typeof Auth !== 'undefined') await Auth.logout();
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    if (!res.ok) throw new Error("Network error");
+                    const data = await res.json();
+                    if (!data.success || !data.url) throw new Error(data.error || "Upload failed");
+
+                    const index = state.feedbacks.findIndex(f => f.id === cardId);
+                    if (index !== -1) {
+                        state.feedbacks[index].imageUrl = data.url;
+                        if (imgNode) imgNode.src = data.fullUrl || getAbsoluteImageUrl(data.url);
+                    }
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    updateSyncStatus("Image upload failed ❌", "error");
+                    if (imgNode) {
+                        imgNode.src = previousSrc;
+                        if (!previousSrc) imgNode.style.display = 'none';
+                    }
+                }
+
+                setIsUploading(false);
+                setTimeout(() => requestSync(), 300);
+                _renderHash.feedbacks = '';
+                markDirty();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
     addFeedbackBtn.addEventListener('click', () => {
         state.feedbacks.push({
             id: crypto.randomUUID(),
             order: state.feedbacks.length + 1,
             clientName: '',
             text: '',
-            rating: 0
+            rating: 0,
+            imageUrl: ''
         });
         _renderHash.feedbacks = '';
         renderFeedbacks();

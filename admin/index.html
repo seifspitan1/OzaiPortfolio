@@ -53,7 +53,8 @@
                             </label>
                             <span id="heroFileName" class="file-name">No file selected</span>
                         </div>
-                        <img id="heroPreview" style="margin-top:10px; max-width:100%; border-radius:0; border:none; box-shadow:none;">
+                        <img id="heroPreview"
+                            style="margin-top:10px; max-width:100%; border-radius:0; border:none; box-shadow:none;">
                     </div>
                 </div>
             </section>
@@ -120,10 +121,6 @@
                     <input type="text" class="project-title" placeholder="Project name">
                 </div>
                 <div class="field-group">
-                    <label>Link</label>
-                    <input type="url" class="project-link" placeholder="https://...">
-                </div>
-                <div class="field-group">
                     <label>Description</label>
                     <textarea class="project-description" placeholder="Project description..."></textarea>
                 </div>
@@ -157,8 +154,16 @@
                     </div>
                 </div>
                 <div class="field-group">
-                    <label>Feedback Text</label>
-                    <textarea class="feedback-text" placeholder="What the client said..."></textarea>
+                    <label>Feedback Image (Optional)</label>
+                    <div class="upload-field">
+                        <label class="upload-button" style="margin: 0; opacity: 1;">
+                            Choose Image
+                            <input type="file" class="feedbackImageUpload" accept="image/*">
+                        </label>
+                        <span class="file-name feedback-file-name">No file selected</span>
+                        <button type="button" class="btn btn-secondary delete-feedback-image" style="display:none; margin-left:8px;">Remove</button>
+                    </div>
+                    <img class="feedbackPreview" style="margin-top:8px; border-radius:6px; max-width:100%; display:none;">
                 </div>
             </div>
         </div>

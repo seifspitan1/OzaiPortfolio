@@ -149,6 +149,10 @@
         padding-right: max(var(--space-md), calc((100vw - 1200px) / 2));
     }
 
+    #commissions {
+        padding-top: 124px;
+    }
+
     /* --- Navbar Desktop: 3-Column Grid Redesign --- */
     nav {
         border-bottom: 1px solid var(--border-subtle);

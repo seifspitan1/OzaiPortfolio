@@ -42,7 +42,7 @@ export async function renderPortfolio() {
 
     state.portfolio.forEach((proj, index) => {
         let card = domNodes.get(proj.id);
-        
+
         if (!card) {
             const clone = projectTpl.content.cloneNode(true);
             card = clone.querySelector('.item-card');
@@ -50,7 +50,7 @@ export async function renderPortfolio() {
             portfolioContainer.appendChild(clone);
             card = portfolioContainer.lastElementChild;
             domNodes.set(proj.id, card);
-            
+
             const imgNode = card.querySelector('.projectPreview');
         }
 
@@ -77,9 +77,6 @@ export async function renderPortfolio() {
         const titleNode = card.querySelector('.project-title');
         if (titleNode && titleNode.value !== proj.title) titleNode.value = proj.title;
 
-        const linkNode = card.querySelector('.project-link');
-        if (linkNode && linkNode.value !== proj.link) linkNode.value = proj.link;
-
         const descNode = card.querySelector('.project-description');
         if (descNode && descNode.value !== proj.description) descNode.value = proj.description || '';
 
@@ -103,8 +100,6 @@ export function initPortfolio() {
 
         if (e.target.classList.contains('project-title')) {
             proj.title = e.target.value;
-        } else if (e.target.classList.contains('project-link')) {
-            proj.link = e.target.value;
         } else if (e.target.classList.contains('project-description')) {
             proj.description = e.target.value;
         } else if (e.target.classList.contains('project-section')) {
@@ -126,7 +121,7 @@ export function initPortfolio() {
             const proj = state.portfolio[index];
             state.portfolio.splice(index, 1);
             state.portfolio.forEach((p, i) => p.order = i + 1);
-            _renderHash.portfolio = ''; 
+            _renderHash.portfolio = '';
             renderPortfolio();
             markDirty();
         } else if (e.target.closest('.move-up') && index > 0) {
@@ -153,7 +148,7 @@ export function initPortfolio() {
             const card = e.target.closest('.item-card');
             if (!card || !card.dataset.id) return;
             const cardId = card.dataset.id;
-            
+
             const file = e.target.files[0];
             if (!file) return;
 
@@ -162,7 +157,7 @@ export function initPortfolio() {
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 const base64 = ev.target.result;
-                
+
                 const imgNode = card.querySelector('.projectPreview');
                 const previousSrc = imgNode ? imgNode.src : '';
                 if (imgNode) imgNode.src = base64; // Optimistic preview
@@ -173,7 +168,7 @@ export function initPortfolio() {
                 setIsUploading(true);
                 try {
                     const res = await fetch('/api/v1/upload', { method: 'POST', body: formData });
-                    
+
                     if (res.status === 401) {
                         if (typeof Auth !== 'undefined') await Auth.logout();
                         window.location.href = 'login.html';
@@ -237,7 +232,6 @@ export function initPortfolio() {
             order: state.portfolio.length + 1,
             title: '',
             description: '',
-            link: '',
             image: '',
             imageId: '',
             section: 'Section 1'

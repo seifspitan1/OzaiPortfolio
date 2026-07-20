@@ -103,9 +103,8 @@ section {
     padding-right: var(--space-md);
 }
 
-/* Global Navbar Offset Handling */
-section[id] {
-    scroll-margin-top: 5rem;
+#commissions {
+    padding-top: 124px;
 }
 
 main {
