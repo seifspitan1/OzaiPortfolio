@@ -97,14 +97,14 @@ article {
 /* --- Section Spacing & Fluid Container --- */
 
 section {
-    padding-top: var(--space-2xl);
-    padding-bottom: var(--space-2xl);
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-lg);
     padding-left: var(--space-md);
     padding-right: var(--space-md);
 }
 
 #commissions {
-    padding-top: 124px;
+    padding-top: var(--space-lg);
 }
 
 main {

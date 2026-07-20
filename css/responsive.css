@@ -150,7 +150,7 @@
     }
 
     #commissions {
-        padding-top: 124px;
+        padding-top: var(--space-3xl);
     }
 
     /* --- Navbar Desktop: 3-Column Grid Redesign --- */
