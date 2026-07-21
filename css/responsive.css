@@ -281,8 +281,7 @@
         position: absolute;
         right: -40px;
         /* Breakout outside right container boundary */
-        bottom: -90px;
-        /* Breakout outside bottom section boundary */
+        bottom: 0;
         top: -60px;
         /* Breakout outside top section boundary */
         width: 48%;
