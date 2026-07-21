@@ -73,7 +73,6 @@
             <section id="tab-portfolio" class="tab-content">
                 <div class="tab-header section-block">
                     <h2>Portfolio Projects</h2>
-                    <button class="btn btn-primary" id="add-project-btn">+ Add Project</button>
                 </div>
 
                 <div class="items-container" id="portfolio-items">
@@ -97,9 +96,12 @@
 
     <!-- ═══ Templates (hidden) ═══ -->
     <template id="tpl-project-item">
-        <div class="card item-card section-block" data-type="project">
+        <div class="card item-card section-block" data-type="project" draggable="true">
             <div class="item-card-header">
-                <span>Project <span class="item-index"></span></span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="project-drag-handle" title="Drag to reorder project inside section">⋮⋮</span>
+                    <span>Project <span class="item-index"></span></span>
+                </div>
                 <div class="item-actions">
                     <button class="btn btn-secondary btn-icon move-up" title="Move up">↑</button>
                     <button class="btn btn-secondary btn-icon move-down" title="Move down">↓</button>
@@ -119,14 +121,6 @@
                     <img class="projectPreview" style="margin-top:8px; border-radius:6px; max-width:100%;">
                 </div>
                 <div class="field-group">
-                    <label>Portfolio Section</label>
-                    <select class="project-section">
-                        <option value="Section 1">Section 1</option>
-                        <option value="Section 2">Section 2</option>
-                        <option value="Section 3">Section 3</option>
-                    </select>
-                </div>
-                <div class="field-group">
                     <label>Title</label>
                     <input type="text" class="project-title" placeholder="Project name">
                 </div>
@@ -134,7 +128,7 @@
                     <label>Project Link</label>
                     <input type="url" class="project-link" placeholder="https://...">
                 </div>
-                <div class="field-group">
+                <div class="field-group" style="grid-column: 1 / -1;">
                     <label>Description</label>
                     <textarea class="project-description" placeholder="Project description..."></textarea>
                 </div>

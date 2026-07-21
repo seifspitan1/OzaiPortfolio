@@ -35,20 +35,58 @@ window.renderPortfolio = function (data) {
     const hasSectionGalleries = Array.from(galleries).some(g => g.dataset.section);
 
     if (hasSectionGalleries) {
-        const sectionsMap = {
-            'Section 1': [],
-            'Section 2': [],
-            'Section 3': []
-        };
+        const defaultSections = ['Section 1', 'Section 2', 'Section 3'];
+        const orderedSections = [];
+
+        // Discover section order sequence from saved portfolio projects order
+        data.portfolio.forEach(item => {
+            const sec = item.section || 'Section 1';
+            if (!orderedSections.includes(sec)) {
+                orderedSections.push(sec);
+            }
+        });
+
+        // Append any default sections not present in data
+        defaultSections.forEach(sec => {
+            if (!orderedSections.includes(sec)) {
+                orderedSections.push(sec);
+            }
+        });
+
+        const sectionsMap = {};
+        orderedSections.forEach(sec => { sectionsMap[sec] = []; });
 
         data.portfolio.forEach(item => {
             const sec = item.section || 'Section 1';
-            if (sectionsMap[sec]) {
-                sectionsMap[sec].push(item);
-            } else {
-                sectionsMap['Section 1'].push(item);
+            if (!sectionsMap[sec]) sectionsMap[sec] = [];
+            sectionsMap[sec].push(item);
+        });
+
+        // Reorder DOM section elements according to orderedSections
+        const sectionElemMap = {};
+        galleries.forEach(gallery => {
+            const secName = gallery.dataset.section || 'Section 1';
+            const parentSec = gallery.closest('.portfolio-section') || gallery.closest('section');
+            if (parentSec) {
+                sectionElemMap[secName] = parentSec;
             }
         });
+
+        const feedbacksSection = document.getElementById('feedbacks');
+        const mainContainer = document.querySelector('main');
+
+        if (mainContainer) {
+            orderedSections.forEach(secName => {
+                const secElem = sectionElemMap[secName];
+                if (secElem) {
+                    if (feedbacksSection) {
+                        mainContainer.insertBefore(secElem, feedbacksSection);
+                    } else {
+                        mainContainer.appendChild(secElem);
+                    }
+                }
+            });
+        }
 
         galleries.forEach(gallery => {
             const secName = gallery.dataset.section || 'Section 1';
