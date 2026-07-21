@@ -62,78 +62,63 @@ window.renderPortfolio = function (data) {
             sectionsMap[sec].push(item);
         });
 
-        // Reorder DOM section elements according to orderedSections
-        const sectionElemMap = {};
-        galleries.forEach(gallery => {
-            const secName = gallery.dataset.section || 'Section 1';
-            const parentSec = gallery.closest('.portfolio-section') || gallery.closest('section');
+        const portfolioSections = Array.from(document.querySelectorAll('.portfolio-section'));
+
+        orderedSections.forEach((secName, idx) => {
+            let parentSec = portfolioSections[idx];
             if (parentSec) {
-                sectionElemMap[secName] = parentSec;
-            }
-        });
+                const h2 = parentSec.querySelector('h2');
+                if (h2) h2.textContent = secName;
 
-        const feedbacksSection = document.getElementById('feedbacks');
-        const mainContainer = document.querySelector('main');
+                const gallery = parentSec.querySelector('.gallery');
+                if (gallery) {
+                    gallery.dataset.section = secName;
+                    const items = sectionsMap[secName] || [];
 
-        if (mainContainer) {
-            orderedSections.forEach(secName => {
-                const secElem = sectionElemMap[secName];
-                if (secElem) {
-                    if (feedbacksSection) {
-                        mainContainer.insertBefore(secElem, feedbacksSection);
-                    } else {
-                        mainContainer.appendChild(secElem);
+                    while (gallery.firstChild) {
+                        gallery.removeChild(gallery.firstChild);
                     }
+
+                    items.forEach(item => {
+                        const itemElem = document.createElement('div');
+                        itemElem.className = 'gallery-item reveal';
+
+                        const imgElem = document.createElement('img');
+                        if (item.imageUrl) {
+                            imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
+                        } else {
+                            imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
+                        }
+                        imgElem.alt = item.title || 'Portfolio Image';
+                        imgElem.loading = 'lazy';
+
+                        const textElem = document.createElement('p');
+                        textElem.className = 'gallery-title';
+                        textElem.textContent = item.title || 'Untitled';
+
+                        if (item.description) {
+                            itemElem.title = item.description;
+                        }
+
+                        if (item.link && item.link.trim() !== '') {
+                            const linkElem = document.createElement('a');
+                            linkElem.href = item.link;
+                            linkElem.target = '_blank';
+                            linkElem.rel = 'noopener noreferrer';
+                            linkElem.style.display = 'block';
+                            linkElem.style.textDecoration = 'none';
+                            linkElem.style.color = 'inherit';
+                            linkElem.appendChild(imgElem);
+                            linkElem.appendChild(textElem);
+                            itemElem.appendChild(linkElem);
+                        } else {
+                            itemElem.appendChild(imgElem);
+                            itemElem.appendChild(textElem);
+                        }
+                        gallery.appendChild(itemElem);
+                    });
                 }
-            });
-        }
-
-        galleries.forEach(gallery => {
-            const secName = gallery.dataset.section || 'Section 1';
-            const items = sectionsMap[secName] || [];
-
-            while (gallery.firstChild) {
-                gallery.removeChild(gallery.firstChild);
             }
-
-            items.forEach(item => {
-                const itemElem = document.createElement('div');
-                itemElem.className = 'gallery-item reveal';
-
-                const imgElem = document.createElement('img');
-                if (item.imageUrl) {
-                    imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
-                } else {
-                    imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
-                }
-                imgElem.alt = item.title || 'Portfolio Image';
-                imgElem.loading = 'lazy';
-
-                const textElem = document.createElement('p');
-                textElem.className = 'gallery-title';
-                textElem.textContent = item.title || 'Untitled';
-
-                if (item.description) {
-                    itemElem.title = item.description;
-                }
-
-                if (item.link && item.link.trim() !== '') {
-                    const linkElem = document.createElement('a');
-                    linkElem.href = item.link;
-                    linkElem.target = '_blank';
-                    linkElem.rel = 'noopener noreferrer';
-                    linkElem.style.display = 'block';
-                    linkElem.style.textDecoration = 'none';
-                    linkElem.style.color = 'inherit';
-                    linkElem.appendChild(imgElem);
-                    linkElem.appendChild(textElem);
-                    itemElem.appendChild(linkElem);
-                } else {
-                    itemElem.appendChild(imgElem);
-                    itemElem.appendChild(textElem);
-                }
-                gallery.appendChild(itemElem);
-            });
         });
     } else {
         // Fallback for single gallery container

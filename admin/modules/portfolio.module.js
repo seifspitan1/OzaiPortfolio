@@ -117,7 +117,7 @@ export async function renderPortfolio() {
                 <div class="section-header-left">
                     <span class="section-drag-handle" title="Drag to reorder section card">☰</span>
                     <button type="button" class="btn-toggle-collapse" title="Collapse/Expand">▼</button>
-                    <h3 class="section-title">${secName}</h3>
+                    <input type="text" class="section-title-input" value="${secName}" placeholder="Section Title" title="Click to rename section">
                     <span class="badge project-count-badge">${secProjects.length} ${secProjects.length === 1 ? 'Project' : 'Projects'}</span>
                 </div>
                 <div class="section-header-actions">
@@ -331,8 +331,39 @@ export function initPortfolio() {
 
     if (!portfolioContainer || !projectTpl) return;
 
-    // Handle Input & Change (title, link, description)
+    // Handle Input & Change (title, link, description, section title)
     const handleInputOrChange = e => {
+        if (e.target.classList.contains('section-title-input')) {
+            const sectionCard = e.target.closest('.section-card');
+            if (!sectionCard) return;
+            const oldSecName = sectionCard.dataset.section;
+            const newSecName = e.target.value.trim() || oldSecName;
+
+            if (oldSecName !== newSecName) {
+                const idx = sectionOrder.indexOf(oldSecName);
+                if (idx !== -1) {
+                    sectionOrder[idx] = newSecName;
+                }
+                state.portfolio.forEach(p => {
+                    if ((p.section || 'Section 1') === oldSecName) {
+                        p.section = newSecName;
+                    }
+                });
+                sectionCard.dataset.section = newSecName;
+                const addBtn = sectionCard.querySelector('.add-section-project-btn');
+                if (addBtn) addBtn.dataset.section = newSecName;
+                const list = sectionCard.querySelector('.section-projects-list');
+                if (list) list.dataset.section = newSecName;
+
+                if (collapsedSections.has(oldSecName)) {
+                    collapsedSections.delete(oldSecName);
+                    collapsedSections.add(newSecName);
+                }
+                markDirty();
+            }
+            return;
+        }
+
         const card = e.target.closest('.item-card');
         if (!card || !card.dataset.id) return;
         const proj = state.portfolio.find(p => p.id === card.dataset.id);
