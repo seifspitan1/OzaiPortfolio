@@ -96,6 +96,10 @@ article {
 
 /* --- Section Spacing & Fluid Container --- */
 
+section[id] {
+    scroll-margin-top: calc(var(--nav-height, 64px) + 24px);
+}
+
 section {
     padding-top: var(--space-lg);
     padding-bottom: var(--space-lg);

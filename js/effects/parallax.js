@@ -1,22 +1,14 @@
 /* --- Effect 5: Scroll Parallax --- */
 export function initParallax() {
-    const heroSection = document.querySelector('#hero');
     const galleryContainer = document.querySelector('.gallery');
 
-    if (!heroSection && !galleryContainer) return;
+    if (!galleryContainer) return;
 
     let ticking = false;
 
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                const scroll = window.scrollY;
-
-                // Hero Background subtle parallax
-                if (heroSection) {
-                    heroSection.style.transform = `translate3d(0, ${scroll * 0.15}px, 0)`;
-                }
-
                 // Gallery subtle scroll mapping
                 if (galleryContainer) {
                     const rect = galleryContainer.getBoundingClientRect();
