@@ -38,7 +38,7 @@ const parseMultipart = (req) => {
     return new Promise((resolve, reject) => {
         let busboy;
         try {
-            busboy = Busboy({ headers: req.headers, limits: { files: 1, fileSize: 2 * 1024 * 1024 } });
+            busboy = Busboy({ headers: req.headers, limits: { files: 1, fileSize: 4 * 1024 * 1024 } });
         } catch (e) {
             return reject(new AppError('Invalid multipart headers.', 400, 'VALIDATION_ERROR'));
         }
@@ -56,7 +56,7 @@ const parseMultipart = (req) => {
             
             file.on('limit', () => {
                 limitTriggered = true;
-                reject(new AppError('Payload Too Large: File size exceeds 2MB limit.', 413, 'PAYLOAD_TOO_LARGE'));
+                reject(new AppError('Payload Too Large: File size exceeds 4MB limit.', 413, 'PAYLOAD_TOO_LARGE'));
             });
 
             file.on('end', () => {
