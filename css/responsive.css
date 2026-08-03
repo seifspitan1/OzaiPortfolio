@@ -113,11 +113,13 @@
 /* --- Tablet Breakpoint (768px - 1023px) --- */
 @media (min-width: 768px) and (max-width: 1023px) {
 
-    /* Adjust grid for mid-sized screens to prevent stretching or squishing */
     .gallery {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
         gap: var(--space-md);
+    }
+
+    .gallery-item {
+        flex: 0 0 calc((100% - var(--space-md)) / 2);
+        width: calc((100% - var(--space-md)) / 2);
     }
 
     .feedback-grid {
@@ -234,9 +236,12 @@
 
     /* --- Portfolio Desktop --- */
     .gallery {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
         gap: var(--space-lg);
+    }
+
+    .gallery-item {
+        flex: 0 0 calc((100% - 2 * var(--space-lg)) / 3);
+        width: calc((100% - 2 * var(--space-lg)) / 3);
     }
 
     /* --- Feedbacks Desktop --- */

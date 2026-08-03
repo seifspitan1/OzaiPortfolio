@@ -79,14 +79,30 @@
 /* --- 3.5 Portfolio --- */
 .gallery {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: var(--space-md);
     margin-top: var(--space-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-primary) transparent;
 }
 
-.gallery-item img {
-    aspect-ratio: 1/1;
-    object-fit: cover;
+.gallery::-webkit-scrollbar {
+    height: 8px;
+}
+
+.gallery::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.gallery::-webkit-scrollbar-thumb {
+    background-color: var(--brand-primary);
+    border-radius: 4px;
 }
 
 /* --- 3.5b Feedbacks --- */
