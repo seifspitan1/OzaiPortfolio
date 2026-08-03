@@ -92,9 +92,13 @@ window.renderPortfolio = function (data) {
                         imgElem.alt = item.title || 'Portfolio Image';
                         imgElem.loading = 'lazy';
 
-                        const textElem = document.createElement('p');
-                        textElem.className = 'gallery-title';
-                        textElem.textContent = item.title || 'Untitled';
+                        const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
+                        let textElem = null;
+                        if (hasTitle) {
+                            textElem = document.createElement('p');
+                            textElem.className = 'gallery-title';
+                            textElem.textContent = item.title.trim();
+                        }
 
                         if (item.description) {
                             itemElem.title = item.description;
@@ -109,11 +113,11 @@ window.renderPortfolio = function (data) {
                             linkElem.style.textDecoration = 'none';
                             linkElem.style.color = 'inherit';
                             linkElem.appendChild(imgElem);
-                            linkElem.appendChild(textElem);
+                            if (textElem) linkElem.appendChild(textElem);
                             itemElem.appendChild(linkElem);
                         } else {
                             itemElem.appendChild(imgElem);
-                            itemElem.appendChild(textElem);
+                            if (textElem) itemElem.appendChild(textElem);
                         }
                         gallery.appendChild(itemElem);
                     });
@@ -140,9 +144,13 @@ window.renderPortfolio = function (data) {
             imgElem.alt = item.title || 'Portfolio Image';
             imgElem.loading = 'lazy';
 
-            const textElem = document.createElement('p');
-            textElem.className = 'gallery-title';
-            textElem.textContent = item.title || 'Untitled';
+            const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
+            let textElem = null;
+            if (hasTitle) {
+                textElem = document.createElement('p');
+                textElem.className = 'gallery-title';
+                textElem.textContent = item.title.trim();
+            }
 
             if (item.description) {
                 itemElem.title = item.description;
@@ -157,11 +165,11 @@ window.renderPortfolio = function (data) {
                 linkElem.style.textDecoration = 'none';
                 linkElem.style.color = 'inherit';
                 linkElem.appendChild(imgElem);
-                linkElem.appendChild(textElem);
+                if (textElem) linkElem.appendChild(textElem);
                 itemElem.appendChild(linkElem);
             } else {
                 itemElem.appendChild(imgElem);
-                itemElem.appendChild(textElem);
+                if (textElem) itemElem.appendChild(textElem);
             }
             container.appendChild(itemElem);
         });
