@@ -112,6 +112,20 @@ section {
     overflow-x: hidden;
 }
 
+.portfolio-section:not(:last-of-type) {
+    padding-bottom: 0;
+}
+
+.portfolio-section + .portfolio-section {
+    padding-top: 36px;
+}
+
+@media (min-width: 601px) {
+    .portfolio-section + .portfolio-section {
+        padding-top: 52px;
+    }
+}
+
 #commissions {
     padding-top: var(--space-lg);
 }

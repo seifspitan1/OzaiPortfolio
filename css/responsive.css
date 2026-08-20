@@ -178,6 +178,14 @@
         padding-right: max(var(--space-md), calc((100vw - 1200px) / 2));
     }
 
+    .portfolio-section:not(:last-of-type) {
+        padding-bottom: 0;
+    }
+
+    .portfolio-section + .portfolio-section {
+        padding-top: 72px;
+    }
+
     #commissions {
         padding-top: var(--space-3xl);
     }
