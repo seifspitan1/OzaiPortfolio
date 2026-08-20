@@ -11,26 +11,9 @@
 const galleryInstances = new Map();
 
 /**
- * Normalizes wheel delta across different browser delta modes.
- * @param {WheelEvent} e
- * @param {number} clientWidth
- * @returns {number}
- */
-function normalizeWheelDelta(e, clientWidth) {
-    let delta = e.deltaY;
-    if (e.deltaMode === 1) {
-        // Line mode (e.g. Firefox default)
-        delta *= 33;
-    } else if (e.deltaMode === 2) {
-        // Page mode
-        delta *= clientWidth;
-    }
-    return delta;
-}
-
-/**
  * Calculates the target scrollLeft position for moving one card step.
  * Computes live card positions relative to container viewport scroll.
+ * Handles subpixel layout, gaps, and snap alignments accurately.
  * @param {HTMLElement} container
  * @param {'prev' | 'next'} direction
  * @returns {number}
@@ -41,6 +24,7 @@ function getCardTargetScrollLeft(container, direction) {
 
     const containerRect = container.getBoundingClientRect();
     const currentScroll = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
     const subpixelTolerance = 3; // px tolerance for snap offsets and subpixel layout
 
     // Calculate actual position of each card in the scroll space
@@ -52,10 +36,10 @@ function getCardTargetScrollLeft(container, direction) {
     if (direction === 'next') {
         for (const pos of cardPositions) {
             if (pos > currentScroll + subpixelTolerance) {
-                return Math.min(pos, container.scrollWidth - container.clientWidth);
+                return Math.min(pos, maxScrollLeft);
             }
         }
-        return container.scrollWidth - container.clientWidth;
+        return maxScrollLeft;
     } else {
         for (let i = cardPositions.length - 1; i >= 0; i--) {
             const pos = cardPositions[i];
@@ -115,11 +99,16 @@ function updateNavButtonStates(container, prevBtn, nextBtn, wrapper) {
 }
 
 /**
- * Creates the non-passive wheel event listener for converting vertical wheel into horizontal scrolling.
+ * Creates the non-passive wheel event listener for converting vertical wheel into horizontal card scrolling.
+ * Uses real-DOM card target calculation and a short gesture cooldown to prevent CSS scroll-snap reverts
+ * and multiple accidental card jumps on high-frequency wheel events.
  * @param {HTMLElement} container
  * @returns {(e: WheelEvent) => void}
  */
 function createWheelHandler(container) {
+    let wheelLockUntil = 0;
+    let lastDirection = null;
+
     return function handleWheel(e) {
         // If horizontal trackpad input is dominant, preserve browser's native horizontal scrolling
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -141,22 +130,38 @@ function createWheelHandler(container) {
         }
 
         const scrollLeft = container.scrollLeft;
-        const subpixelTolerance = 2;
+        const subpixelTolerance = 3;
         const canScrollLeft = scrollLeft > subpixelTolerance;
         const canScrollRight = scrollLeft < maxScrollLeft - subpixelTolerance;
 
         const isMovingRight = e.deltaY > 0;
         const isMovingLeft = e.deltaY < 0;
 
+        const now = performance.now();
+
         // Conditionally intercept only when movement is possible in the requested direction
-        if ((isMovingRight && canScrollRight) || (isMovingLeft && canScrollLeft)) {
+        if (isMovingRight && canScrollRight) {
             e.preventDefault();
-            const delta = normalizeWheelDelta(e, clientWidth);
-            // Natural immediate scrolling for wheel input to avoid queued smooth-scroll animations
-            container.scrollLeft += delta;
+            if (now > wheelLockUntil || lastDirection !== 'next') {
+                const target = getCardTargetScrollLeft(container, 'next');
+                container.scrollTo({ left: target, behavior: 'smooth' });
+                wheelLockUntil = now + 350;
+                lastDirection = 'next';
+            }
+        } else if (isMovingLeft && canScrollLeft) {
+            e.preventDefault();
+            if (now > wheelLockUntil || lastDirection !== 'prev') {
+                const target = getCardTargetScrollLeft(container, 'prev');
+                container.scrollTo({ left: target, behavior: 'smooth' });
+                wheelLockUntil = now + 350;
+                lastDirection = 'prev';
+            }
+        } else {
+            // At horizontal boundaries (first or last card), release lock and do NOT prevent default,
+            // allowing the browser to vertically scroll the page naturally without trapping the user.
+            wheelLockUntil = 0;
+            lastDirection = null;
         }
-        // At horizontal boundaries (first or last card), event is NOT prevented,
-        // allowing the browser to vertically scroll the page naturally without trapping the user.
     };
 }
 
@@ -207,9 +212,9 @@ export function setupGalleryInstance(container) {
         return;
     }
 
-    // Bind wheel listener (non-passive to allow conditional preventDefault)
+    // Bind wheel listener to wrapper (non-passive to allow conditional preventDefault on any card/gap/button hover)
     const wheelHandler = createWheelHandler(container);
-    container.addEventListener('wheel', wheelHandler, { passive: false });
+    wrapper.addEventListener('wheel', wheelHandler, { passive: false });
 
     // Bind Previous button click handler (smooth card step)
     const onPrevClick = (e) => {
@@ -261,7 +266,7 @@ export function setupGalleryInstance(container) {
     };
 
     const destroy = () => {
-        container.removeEventListener('wheel', wheelHandler);
+        wrapper.removeEventListener('wheel', wheelHandler);
         prevBtn.removeEventListener('click', onPrevClick);
         nextBtn.removeEventListener('click', onNextClick);
         container.removeEventListener('scroll', onScroll);
