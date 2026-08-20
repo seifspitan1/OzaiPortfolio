@@ -174,6 +174,10 @@ window.renderPortfolio = function (data) {
             container.appendChild(itemElem);
         });
     }
+
+    if (typeof window.updateAllGalleryNav === 'function') {
+        window.updateAllGalleryNav();
+    }
 };
 
 window.renderFeedbacks = function (data) {

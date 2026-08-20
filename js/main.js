@@ -11,16 +11,25 @@
 import { initMobileNav, initDynamicNavbar } from './components/navbar.js';
 import { initSmoothScroll } from './features/smooth-scroll.js';
 import { initScrollSpy } from './features/scroll-spy.js';
+import { initGalleryNav, updateAllGalleryNav } from './features/gallery-nav.js';
 import { initMagneticButtons } from './effects/magnetic.js';
 import { initHoverGlow } from './effects/hover-glow.js';
 import { initScrollReveal } from './effects/scroll-reveal.js';
 import { initParallax } from './effects/parallax.js';
+
+// Expose updateAllGalleryNav globally for dynamic renderers and API loaders
+window.updateAllGalleryNav = updateAllGalleryNav;
 
 initMobileNav();
 initDynamicNavbar();
 
 initSmoothScroll();
 initScrollSpy();
+initGalleryNav();
+
+document.addEventListener('siteDataLoaded', () => {
+    updateAllGalleryNav();
+});
 
 initMagneticButtons();
 initHoverGlow();
