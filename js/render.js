@@ -28,7 +28,102 @@ window.renderHero = function (data) {
     }
 };
 
+function reorderPortfolioSections(sections) {
+    if (!sections || !Array.isArray(sections) || sections.length === 0) return;
+
+    const existingSections = Array.from(document.querySelectorAll('.portfolio-section'));
+    if (existingSections.length === 0) return;
+
+    const parent = existingSections[0].parentNode;
+    if (!parent) return;
+
+    // Filter to sections belonging to the same parent container
+    const siblingSections = existingSections.filter(node => node.parentNode === parent);
+    if (siblingSections.length === 0) return;
+
+    // Map existing sections by data-section-id as the ONLY identity source
+    const sectionMap = new Map();
+    siblingSections.forEach(node => {
+        const secId = node.dataset && node.dataset.sectionId;
+        if (secId && !sectionMap.has(secId)) {
+            sectionMap.set(secId, node);
+        }
+    });
+
+    const orderedNodes = [];
+    const placedNodes = new Set();
+
+    // 1. Add canonical sections in sorted order
+    sections.forEach(sec => {
+        if (sec && sec.id && sectionMap.has(sec.id)) {
+            const node = sectionMap.get(sec.id);
+            if (!placedNodes.has(node)) {
+                orderedNodes.push(node);
+                placedNodes.add(node);
+            }
+        }
+    });
+
+    // 2. Preserve unknown/unregistered DOM sections instead of deleting them
+    siblingSections.forEach(node => {
+        if (!placedNodes.has(node)) {
+            orderedNodes.push(node);
+            placedNodes.add(node);
+        }
+    });
+
+    // Check if the DOM nodes are already in the exact target order
+    const isAlreadyOrdered = siblingSections.length === orderedNodes.length &&
+        siblingSections.every((node, i) => node === orderedNodes[i]);
+
+    if (isAlreadyOrdered) return;
+
+    // 3. Move existing nodes in place safely using a temporary comment marker and DocumentFragment
+    const marker = document.createComment('portfolio-marker');
+    parent.insertBefore(marker, siblingSections[0]);
+
+    const fragment = document.createDocumentFragment();
+    orderedNodes.forEach(node => {
+        fragment.appendChild(node);
+    });
+
+    parent.insertBefore(fragment, marker);
+    if (marker.parentNode) {
+        marker.parentNode.removeChild(marker);
+    }
+}
+
 window.renderPortfolio = function (data) {
+    let sections = [];
+    if (data && Array.isArray(data.sections) && data.sections.length > 0) {
+        // Sort a copy of data.sections numerically by order ascending
+        sections = data.sections
+            .slice()
+            .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+    } else if (data && Array.isArray(data.portfolio) && data.portfolio.length > 0) {
+        // Backward-compatibility derivation if data.sections is absent
+        const defaultSections = [
+            { id: 'sec-1', title: 'Cartoon Roblox Studio', order: 1 },
+            { id: 'sec-2', title: 'Semi Realistic', order: 2 },
+            { id: 'sec-3', title: 'Realistic', order: 3 }
+        ];
+        const foundTitles = [];
+        data.portfolio.forEach(item => {
+            const sec = item.section || 'Cartoon Roblox Studio';
+            if (!foundTitles.includes(sec)) foundTitles.push(sec);
+        });
+        sections = defaultSections.map((def, idx) => ({
+            id: def.id,
+            title: foundTitles[idx] || def.title,
+            order: def.order
+        }));
+    }
+
+    // Physically reorder existing .portfolio-section DOM nodes to match canonical order
+    if (sections.length > 0) {
+        reorderPortfolioSections(sections);
+    }
+
     const galleries = document.querySelectorAll('.gallery');
     if (galleries.length === 0) return;
 
@@ -41,14 +136,13 @@ window.renderPortfolio = function (data) {
 
     // Check for empty or missing portfolio
     if (!data || !Array.isArray(data.portfolio) || data.portfolio.length === 0) {
-        // If sections are configured, render their custom titles even when portfolio is empty
-        if (data && Array.isArray(data.sections) && data.sections.length > 0) {
-            const portfolioSections = Array.from(document.querySelectorAll('.portfolio-section'));
-            data.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).forEach((sec, idx) => {
-                const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`) || portfolioSections[idx];
+        // If sections are configured, render their canonical titles even when portfolio is empty
+        if (sections.length > 0) {
+            sections.forEach(sec => {
+                const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`);
                 if (parentSec) {
                     const h2 = parentSec.querySelector('h2');
-                    if (h2) h2.textContent = sec.title;
+                    if (h2 && sec.title) h2.textContent = sec.title;
                 }
             });
         }
@@ -70,45 +164,28 @@ window.renderPortfolio = function (data) {
     const hasSectionGalleries = Array.from(galleries).some(g => g.dataset.section || g.dataset.sectionId);
 
     if (hasSectionGalleries) {
-        let sections = [];
-        if (data.sections && Array.isArray(data.sections) && data.sections.length > 0) {
-            sections = data.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-        } else {
-            // Backward-compatibility derivation if data.sections is absent
-            const defaultSections = [
-                { id: 'sec-1', title: 'Cartoon Roblox Studio', order: 1 },
-                { id: 'sec-2', title: 'Semi Realistic', order: 2 },
-                { id: 'sec-3', title: 'Realistic', order: 3 }
-            ];
-            const foundTitles = [];
-            data.portfolio.forEach(item => {
-                const sec = item.section || 'Cartoon Roblox Studio';
-                if (!foundTitles.includes(sec)) foundTitles.push(sec);
-            });
-            sections = defaultSections.map((def, idx) => ({
-                id: def.id,
-                title: foundTitles[idx] || def.title,
-                order: def.order
-            }));
-        }
-
-        const portfolioSections = Array.from(document.querySelectorAll('.portfolio-section'));
-
-        sections.forEach((sec, idx) => {
-            // Match by stable data-section-id or fallback to DOM index
-            const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`) || portfolioSections[idx];
+        sections.forEach(sec => {
+            // Match by stable data-section-id as the ONLY identity source
+            const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`);
             if (!parentSec) return;
 
             const h2 = parentSec.querySelector('h2');
-            if (h2) h2.textContent = sec.title;
+            if (h2 && sec.title) h2.textContent = sec.title;
 
             const gallery = parentSec.querySelector('.gallery');
             if (!gallery) return;
 
             gallery.dataset.sectionId = sec.id;
-            gallery.dataset.section = sec.title;
+            if (sec.title) {
+                gallery.dataset.section = sec.title;
+            }
 
-            const items = data.portfolio.filter(p => p.sectionId === sec.id || (p.section || 'Cartoon Roblox Studio') === sec.title);
+            const items = data.portfolio.filter(p => {
+                if (p.sectionId) {
+                    return p.sectionId === sec.id;
+                }
+                return (p.section || 'Cartoon Roblox Studio') === sec.title;
+            });
 
             while (gallery.firstChild) {
                 gallery.removeChild(gallery.firstChild);
