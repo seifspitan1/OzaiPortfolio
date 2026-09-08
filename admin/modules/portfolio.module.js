@@ -1,5 +1,6 @@
 /* ── Portfolio Module ─────────────────────────
- * Grouped Section Cards (Section 1, Section 2, Section 3).
+ * Canonical Portfolio Sections & Project Management.
+ * Stable section IDs, title persistence, and order synchronization.
  * Intra-section project reordering & inter-section card reordering.
  * Images stored/uploaded via /api/v1/upload.
  * ──────────────────────────────────────────── */
@@ -12,135 +13,143 @@ import { getAbsoluteImageUrl, updateSyncStatus } from './ui.module.js';
 let portfolioContainer = null;
 let projectTpl = null;
 
-const DEFAULT_SECTIONS = ['Section 1', 'Section 2', 'Section 3'];
-let sectionOrder = ['Section 1', 'Section 2', 'Section 3'];
+export const DEFAULT_SECTIONS = [
+    { id: 'sec-1', title: 'Cartoon Roblox Studio', order: 1 },
+    { id: 'sec-2', title: 'Semi Realistic', order: 2 },
+    { id: 'sec-3', title: 'Realistic', order: 3 }
+];
+
 const collapsedSections = new Set();
 
 let draggedItemType = null; // 'section' or 'project'
+let draggedSectionId = null;
 let draggedSectionName = null;
 let draggedProjectId = null;
 
 /**
- * Re-indexes state.portfolio based on current sectionOrder and project relative order.
+ * Ensures state.sections contains valid canonical section records.
+ * Seeds from DEFAULT_SECTIONS if empty or uninitialized.
+ */
+export function ensureSectionsInitialized() {
+    if (!Array.isArray(state.sections) || state.sections.length === 0) {
+        state.sections = DEFAULT_SECTIONS.map(s => ({ ...s }));
+    }
+
+    // Ensure all sections have id, title, and positive order
+    state.sections.forEach((sec, idx) => {
+        if (!sec.id) sec.id = `sec-${idx + 1}`;
+        if (!sec.title) sec.title = `Section ${idx + 1}`;
+        if (typeof sec.order !== 'number' || sec.order < 1) sec.order = idx + 1;
+    });
+
+    state.sections.sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Re-indexes state.portfolio based on canonical state.sections and relative project order.
  * Ensures `order` numbers (1..N) reflect section ordering + intra-section project ordering.
  */
 export function syncPortfolioStateOrders() {
-    // Preserve default sections in order
-    const currentSections = new Set();
-    state.portfolio.forEach(p => {
-        const sec = p.section || 'Section 1';
-        currentSections.add(sec);
-    });
+    ensureSectionsInitialized();
 
-    // Re-build sectionOrder if necessary while respecting active sectionOrder sequence
-    const updatedOrder = sectionOrder.filter(sec => DEFAULT_SECTIONS.includes(sec) || currentSections.has(sec));
-    DEFAULT_SECTIONS.forEach(sec => {
-        if (!updatedOrder.includes(sec)) {
-            updatedOrder.push(sec);
-        }
-    });
-    sectionOrder = updatedOrder;
-
-    // Group projects by section
+    // Group projects by section (matching by stable sectionId or title for backward compatibility)
     const grouped = {};
-    sectionOrder.forEach(sec => { grouped[sec] = []; });
+    state.sections.forEach(sec => { grouped[sec.id] = []; });
+    const unassigned = [];
 
     state.portfolio.forEach(p => {
-        const sec = p.section || 'Section 1';
-        if (!grouped[sec]) grouped[sec] = [];
-        grouped[sec].push(p);
+        let matchedSec = state.sections.find(s => s.id === p.sectionId);
+        if (!matchedSec && p.section) {
+            matchedSec = state.sections.find(s => s.title === p.section);
+        }
+        if (!matchedSec && state.sections.length > 0) {
+            matchedSec = state.sections[0];
+        }
+
+        if (matchedSec) {
+            p.sectionId = matchedSec.id;
+            p.section = matchedSec.title;
+            grouped[matchedSec.id].push(p);
+        } else {
+            unassigned.push(p);
+        }
     });
 
     // Reconstruct flattened state.portfolio with updated order property
     const newPortfolio = [];
     let currentOrder = 1;
 
-    sectionOrder.forEach(sec => {
-        const projects = grouped[sec] || [];
+    state.sections.forEach(sec => {
+        const projects = grouped[sec.id] || [];
         projects.forEach(p => {
-            p.section = sec;
+            p.sectionId = sec.id;
+            p.section = sec.title;
             p.order = currentOrder++;
             newPortfolio.push(p);
         });
+    });
+
+    unassigned.forEach(p => {
+        p.order = currentOrder++;
+        newPortfolio.push(p);
     });
 
     state.portfolio.length = 0;
     state.portfolio.push(...newPortfolio);
 }
 
-/**
- * Initializes sectionOrder from existing state.portfolio order of appearance
- */
-function initSectionOrderFromState() {
-    const foundSections = [];
-    state.portfolio.forEach(p => {
-        const sec = p.section || 'Section 1';
-        if (!foundSections.includes(sec)) {
-            foundSections.push(sec);
-        }
-    });
-
-    DEFAULT_SECTIONS.forEach(sec => {
-        if (!foundSections.includes(sec)) {
-            foundSections.push(sec);
-        }
-    });
-
-    sectionOrder = foundSections;
-}
-
 export async function renderPortfolio() {
     if (!portfolioContainer || !projectTpl) return;
 
-    // Ensure state orders and sectionOrder are synchronized
-    if (state.portfolio.length > 0) {
-        initSectionOrderFromState();
-    }
+    ensureSectionsInitialized();
     syncPortfolioStateOrders();
 
-    const hash = _hashPortfolio() + ';;secOrder:' + sectionOrder.join(',');
+    const secHash = state.sections.map(s => `${s.id}:${s.title}:${s.order}`).join(';');
+    const hash = _hashPortfolio() + ';;secConfig:' + secHash;
     if (hash === _renderHash.portfolio) return;
     _renderHash.portfolio = hash;
 
     portfolioContainer.innerHTML = '';
 
-    sectionOrder.forEach(secName => {
-        const secProjects = state.portfolio.filter(p => (p.section || 'Section 1') === secName);
-        const isCollapsed = collapsedSections.has(secName);
+    state.sections.forEach(sec => {
+        const secProjects = state.portfolio.filter(p => p.sectionId === sec.id || p.section === sec.title);
+        const isCollapsed = collapsedSections.has(sec.id);
 
         const sectionCard = document.createElement('div');
         sectionCard.className = `section-card ${isCollapsed ? 'collapsed' : ''}`;
-        sectionCard.dataset.section = secName;
+        sectionCard.dataset.sectionId = sec.id;
+        sectionCard.dataset.section = sec.title;
 
         sectionCard.innerHTML = `
-            <div class="section-card-header" draggable="true">
+            <div class="section-card-header" draggable="true" data-section-id="${sec.id}">
                 <div class="section-header-left">
                     <span class="section-drag-handle" title="Drag to reorder section card">☰</span>
                     <button type="button" class="btn-toggle-collapse" title="Collapse/Expand">▼</button>
-                    <input type="text" class="section-title-input" value="${secName}" placeholder="Section Title" title="Click to rename section">
+                    <input type="text" class="section-title-input" value="${sec.title}" placeholder="Section Title" title="Click to rename section" data-section-id="${sec.id}">
                     <span class="badge project-count-badge">${secProjects.length} ${secProjects.length === 1 ? 'Project' : 'Projects'}</span>
                 </div>
                 <div class="section-header-actions">
-                    <button type="button" class="btn btn-secondary btn-icon move-section-up" title="Move section up">↑</button>
-                    <button type="button" class="btn btn-secondary btn-icon move-section-down" title="Move section down">↓</button>
-                    <button type="button" class="btn btn-primary add-section-project-btn" data-section="${secName}">+ Add Project</button>
+                    <button type="button" class="btn btn-secondary btn-icon move-section-up" title="Move section up" data-section-id="${sec.id}">↑</button>
+                    <button type="button" class="btn btn-secondary btn-icon move-section-down" title="Move section down" data-section-id="${sec.id}">↓</button>
+                    <button type="button" class="btn btn-primary add-section-project-btn" data-section-id="${sec.id}" data-section="${sec.title}">+ Add Project</button>
                 </div>
             </div>
             <div class="section-card-body">
-                <div class="section-projects-list" data-section="${secName}"></div>
+                <div class="section-projects-list" data-section-id="${sec.id}" data-section="${sec.title}"></div>
             </div>
         `;
 
         const listContainer = sectionCard.querySelector('.section-projects-list');
 
         if (secProjects.length === 0) {
-            listContainer.innerHTML = `<div class="empty-state">No projects in ${secName} yet.</div>`;
+            listContainer.innerHTML = `<div class="empty-state">No projects in ${sec.title} yet.</div>`;
         } else {
             secProjects.forEach((proj, idx) => {
                 const clone = projectTpl.content.cloneNode(true);
                 const card = clone.querySelector('.item-card');
                 card.dataset.id = proj.id;
-                card.dataset.section = secName;
+                card.dataset.sectionId = sec.id;
+                card.dataset.section = sec.title;
                 card.setAttribute('draggable', 'true');
 
                 const imgNode = card.querySelector('.projectPreview');
@@ -183,8 +192,9 @@ function setupDragAndDropEvents() {
         header.addEventListener('dragstart', (e) => {
             const sectionCard = header.closest('.section-card');
             draggedItemType = 'section';
+            draggedSectionId = sectionCard.dataset.sectionId;
             draggedSectionName = sectionCard.dataset.section;
-            e.dataTransfer.setData('text/plain', `section:${draggedSectionName}`);
+            e.dataTransfer.setData('text/plain', `section:${draggedSectionId}`);
             e.dataTransfer.effectAllowed = 'move';
             sectionCard.classList.add('is-dragging');
         });
@@ -193,6 +203,7 @@ function setupDragAndDropEvents() {
             const sectionCard = header.closest('.section-card');
             sectionCard.classList.remove('is-dragging');
             draggedItemType = null;
+            draggedSectionId = null;
             draggedSectionName = null;
             clearDragStyles();
         });
@@ -216,15 +227,17 @@ function setupDragAndDropEvents() {
             e.preventDefault();
             card.classList.remove('section-drag-over');
 
-            const targetSection = card.dataset.section;
-            if (!draggedSectionName || draggedSectionName === targetSection) return;
+            const targetSectionId = card.dataset.sectionId;
+            if (!draggedSectionId || draggedSectionId === targetSectionId) return;
 
-            const fromIdx = sectionOrder.indexOf(draggedSectionName);
-            const toIdx = sectionOrder.indexOf(targetSection);
+            const fromIdx = state.sections.findIndex(s => s.id === draggedSectionId);
+            const toIdx = state.sections.findIndex(s => s.id === targetSectionId);
 
             if (fromIdx !== -1 && toIdx !== -1) {
-                sectionOrder.splice(fromIdx, 1);
-                sectionOrder.splice(toIdx, 0, draggedSectionName);
+                const [movedSec] = state.sections.splice(fromIdx, 1);
+                state.sections.splice(toIdx, 0, movedSec);
+
+                state.sections.forEach((s, idx) => { s.order = idx + 1; });
 
                 syncPortfolioStateOrders();
                 _renderHash.portfolio = '';
@@ -241,8 +254,9 @@ function setupDragAndDropEvents() {
             e.stopPropagation(); // Prevents triggering section drag
             draggedItemType = 'project';
             draggedProjectId = card.dataset.id;
+            draggedSectionId = card.dataset.sectionId;
             draggedSectionName = card.dataset.section;
-            e.dataTransfer.setData('text/plain', `project:${draggedProjectId}:${draggedSectionName}`);
+            e.dataTransfer.setData('text/plain', `project:${draggedProjectId}:${draggedSectionId}`);
             e.dataTransfer.effectAllowed = 'move';
             card.classList.add('is-dragging');
         });
@@ -252,6 +266,7 @@ function setupDragAndDropEvents() {
             card.classList.remove('is-dragging');
             draggedItemType = null;
             draggedProjectId = null;
+            draggedSectionId = null;
             draggedSectionName = null;
             clearDragStyles();
         });
@@ -259,7 +274,7 @@ function setupDragAndDropEvents() {
         card.addEventListener('dragover', (e) => {
             if (draggedItemType !== 'project') return;
             // Strictly enforce D&D ONLY inside the same section!
-            if (card.dataset.section !== draggedSectionName) return;
+            if (card.dataset.sectionId !== draggedSectionId && card.dataset.section !== draggedSectionName) return;
 
             e.preventDefault();
             e.stopPropagation();
@@ -282,7 +297,7 @@ function setupDragAndDropEvents() {
 
         card.addEventListener('drop', (e) => {
             if (draggedItemType !== 'project') return;
-            if (card.dataset.section !== draggedSectionName) return; // Disallow cross-section drop
+            if (card.dataset.sectionId !== draggedSectionId && card.dataset.section !== draggedSectionName) return;
 
             e.preventDefault();
             e.stopPropagation();
@@ -291,7 +306,7 @@ function setupDragAndDropEvents() {
             const targetId = card.dataset.id;
             if (draggedProjectId === targetId) return;
 
-            const sectionProjects = state.portfolio.filter(p => (p.section || 'Section 1') === draggedSectionName);
+            const sectionProjects = state.portfolio.filter(p => p.sectionId === draggedSectionId || p.section === draggedSectionName);
             const fromIdx = sectionProjects.findIndex(p => p.id === draggedProjectId);
             const toIdx = sectionProjects.findIndex(p => p.id === targetId);
 
@@ -306,7 +321,7 @@ function setupDragAndDropEvents() {
                 sectionProjects.splice(finalIdx, 0, movedProject);
 
                 // Replace section projects in state.portfolio
-                const otherProjects = state.portfolio.filter(p => (p.section || 'Section 1') !== draggedSectionName);
+                const otherProjects = state.portfolio.filter(p => p.sectionId !== draggedSectionId && p.section !== draggedSectionName);
                 state.portfolio.length = 0;
                 state.portfolio.push(...otherProjects, ...sectionProjects);
 
@@ -336,29 +351,38 @@ export function initPortfolio() {
         if (e.target.classList.contains('section-title-input')) {
             const sectionCard = e.target.closest('.section-card');
             if (!sectionCard) return;
-            const oldSecName = sectionCard.dataset.section;
+            const secId = e.target.dataset.sectionId || sectionCard.dataset.sectionId;
+            const secObj = state.sections.find(s => s.id === secId);
+            if (!secObj) return;
+
+            const oldSecName = secObj.title;
             const newSecName = e.target.value.trim() || oldSecName;
 
             if (oldSecName !== newSecName) {
-                const idx = sectionOrder.indexOf(oldSecName);
-                if (idx !== -1) {
-                    sectionOrder[idx] = newSecName;
-                }
+                // 1. Update canonical state.sections
+                secObj.title = newSecName;
+
+                // 2. Update projects for backward compatibility
                 state.portfolio.forEach(p => {
-                    if ((p.section || 'Section 1') === oldSecName) {
+                    if (p.sectionId === secId || p.section === oldSecName) {
+                        p.sectionId = secId;
                         p.section = newSecName;
                     }
                 });
+
+                // 3. Update DOM attributes
                 sectionCard.dataset.section = newSecName;
                 const addBtn = sectionCard.querySelector('.add-section-project-btn');
                 if (addBtn) addBtn.dataset.section = newSecName;
                 const list = sectionCard.querySelector('.section-projects-list');
                 if (list) list.dataset.section = newSecName;
 
-                if (collapsedSections.has(oldSecName)) {
-                    collapsedSections.delete(oldSecName);
-                    collapsedSections.add(newSecName);
+                // 4. Immediately update empty-state text if present
+                const emptyStateEl = sectionCard.querySelector('.empty-state');
+                if (emptyStateEl) {
+                    emptyStateEl.textContent = `No projects in ${newSecName} yet.`;
                 }
+
                 markDirty();
             }
             return;
@@ -389,12 +413,12 @@ export function initPortfolio() {
         if (toggleBtn) {
             const sectionCard = toggleBtn.closest('.section-card');
             if (sectionCard) {
-                const secName = sectionCard.dataset.section;
-                if (collapsedSections.has(secName)) {
-                    collapsedSections.delete(secName);
+                const secId = sectionCard.dataset.sectionId;
+                if (collapsedSections.has(secId)) {
+                    collapsedSections.delete(secId);
                     sectionCard.classList.remove('collapsed');
                 } else {
-                    collapsedSections.add(secName);
+                    collapsedSections.add(secId);
                     sectionCard.classList.add('collapsed');
                 }
             }
@@ -404,8 +428,12 @@ export function initPortfolio() {
         // 2. Section "+ Add Project"
         const addSecBtn = e.target.closest('.add-section-project-btn');
         if (addSecBtn) {
-            const secName = addSecBtn.dataset.section || 'Section 1';
-            collapsedSections.delete(secName); // Uncollapse to show newly created item
+            const secId = addSecBtn.dataset.sectionId;
+            const secObj = state.sections.find(s => s.id === secId) || state.sections[0];
+            const resolvedId = secObj ? secObj.id : (secId || 'sec-1');
+            const resolvedTitle = secObj ? secObj.title : (addSecBtn.dataset.section || 'Cartoon Roblox Studio');
+
+            collapsedSections.delete(resolvedId); // Uncollapse to show newly created item
 
             state.portfolio.push({
                 id: crypto.randomUUID(),
@@ -416,7 +444,8 @@ export function initPortfolio() {
                 image: '',
                 imageId: '',
                 imageUrl: '',
-                section: secName
+                sectionId: resolvedId,
+                section: resolvedTitle
             });
 
             syncPortfolioStateOrders();
@@ -430,12 +459,13 @@ export function initPortfolio() {
         const moveSecUp = e.target.closest('.move-section-up');
         if (moveSecUp) {
             const sectionCard = moveSecUp.closest('.section-card');
-            const secName = sectionCard.dataset.section;
-            const idx = sectionOrder.indexOf(secName);
+            const secId = sectionCard.dataset.sectionId;
+            const idx = state.sections.findIndex(s => s.id === secId);
             if (idx > 0) {
-                const temp = sectionOrder[idx];
-                sectionOrder[idx] = sectionOrder[idx - 1];
-                sectionOrder[idx - 1] = temp;
+                const temp = state.sections[idx];
+                state.sections[idx] = state.sections[idx - 1];
+                state.sections[idx - 1] = temp;
+                state.sections.forEach((s, i) => { s.order = i + 1; });
                 syncPortfolioStateOrders();
                 _renderHash.portfolio = '';
                 renderPortfolio();
@@ -448,12 +478,13 @@ export function initPortfolio() {
         const moveSecDown = e.target.closest('.move-section-down');
         if (moveSecDown) {
             const sectionCard = moveSecDown.closest('.section-card');
-            const secName = sectionCard.dataset.section;
-            const idx = sectionOrder.indexOf(secName);
-            if (idx < sectionOrder.length - 1) {
-                const temp = sectionOrder[idx];
-                sectionOrder[idx] = sectionOrder[idx + 1];
-                sectionOrder[idx + 1] = temp;
+            const secId = sectionCard.dataset.sectionId;
+            const idx = state.sections.findIndex(s => s.id === secId);
+            if (idx !== -1 && idx < state.sections.length - 1) {
+                const temp = state.sections[idx];
+                state.sections[idx] = state.sections[idx + 1];
+                state.sections[idx + 1] = temp;
+                state.sections.forEach((s, i) => { s.order = i + 1; });
                 syncPortfolioStateOrders();
                 _renderHash.portfolio = '';
                 renderPortfolio();
@@ -466,9 +497,10 @@ export function initPortfolio() {
         const card = e.target.closest('.item-card');
         if (!card || !card.dataset.id) return;
         const cardId = card.dataset.id;
-        const secName = card.dataset.section || 'Section 1';
+        const secId = card.dataset.sectionId;
+        const secName = card.dataset.section;
 
-        const sectionProjects = state.portfolio.filter(p => (p.section || 'Section 1') === secName);
+        const sectionProjects = state.portfolio.filter(p => p.sectionId === secId || p.section === secName);
         const secIndex = sectionProjects.findIndex(p => p.id === cardId);
 
         if (secIndex === -1) return;
@@ -487,7 +519,7 @@ export function initPortfolio() {
             sectionProjects[secIndex] = sectionProjects[secIndex - 1];
             sectionProjects[secIndex - 1] = temp;
 
-            const otherProjects = state.portfolio.filter(p => (p.section || 'Section 1') !== secName);
+            const otherProjects = state.portfolio.filter(p => p.sectionId !== secId && p.section !== secName);
             state.portfolio.length = 0;
             state.portfolio.push(...otherProjects, ...sectionProjects);
 
@@ -500,7 +532,7 @@ export function initPortfolio() {
             sectionProjects[secIndex] = sectionProjects[secIndex + 1];
             sectionProjects[secIndex + 1] = temp;
 
-            const otherProjects = state.portfolio.filter(p => (p.section || 'Section 1') !== secName);
+            const otherProjects = state.portfolio.filter(p => p.sectionId !== secId && p.section !== secName);
             state.portfolio.length = 0;
             state.portfolio.push(...otherProjects, ...sectionProjects);
 

@@ -11,22 +11,29 @@ export const state = {
         imageId: ''
     },
     portfolio: [],
-    feedbacks: []
+    feedbacks: [],
+    sections: []
 };
 
 /* ── Render Hash Guards ────────────────────── */
-export const _renderHash = { hero: '', portfolio: '', feedbacks: '' };
+export const _renderHash = { hero: '', portfolio: '', feedbacks: '', sections: '' };
 
 export function _hashHero() {
     return state.hero.imageUrl || state.hero.image || '';
 }
 
 export function _hashPortfolio() {
-    return state.portfolio.map(p => `${p.order}|${p.title}|${p.section || 'Section 1'}|${p.imageUrl || p.image || ''}`).join(';;');
+    const secHash = (state.sections || []).map(s => `${s.id}:${s.title}:${s.order}`).join(';');
+    const portHash = state.portfolio.map(p => `${p.order}|${p.title}|${p.section || 'Section 1'}|${p.imageUrl || p.image || ''}`).join(';;');
+    return `${secHash}:::${portHash}`;
 }
 
 export function _hashFeedbacks() {
     return state.feedbacks.map(f => `${f.order}|${f.clientName}|${f.text}|${f.rating}|${f.imageUrl || f.image || ''}`).join(';;');
+}
+
+export function _hashSections() {
+    return (state.sections || []).map(s => `${s.id}|${s.order}|${s.title}`).join(';;');
 }
 
 /* ── Utility Functions ─────────────────────── */
@@ -40,7 +47,7 @@ export function sanitizeNetworkState(stateObj) {
         imageUrl: stateObj.hero.imageUrl || ''
     };
 
-    const cleanPortfolio = stateObj.portfolio.map(p => {
+    const cleanPortfolio = (stateObj.portfolio || []).map(p => {
         return {
             id: p.id || '',
             order: p.order || 0,
@@ -52,7 +59,7 @@ export function sanitizeNetworkState(stateObj) {
         };
     });
 
-    const cleanFeedbacks = stateObj.feedbacks.map(f => {
+    const cleanFeedbacks = (stateObj.feedbacks || []).map(f => {
         return {
             id: f.id || '',
             order: f.order || 0,
@@ -63,10 +70,19 @@ export function sanitizeNetworkState(stateObj) {
         };
     });
 
+    const cleanSections = (stateObj.sections || []).map((s, idx) => {
+        return {
+            id: s.id || `sec-${idx + 1}`,
+            title: s.title || `Section ${idx + 1}`,
+            order: s.order || idx + 1
+        };
+    });
+
     return {
         hero: cleanHero,
         portfolio: cleanPortfolio,
-        feedbacks: cleanFeedbacks
+        feedbacks: cleanFeedbacks,
+        sections: cleanSections
     };
 }
 
@@ -76,5 +92,8 @@ export function assignMissingIds() {
     if (state.hero && !state.hero.id) state.hero.id = crypto.randomUUID();
     state.portfolio.forEach(p => { if (!p.id) p.id = crypto.randomUUID(); });
     state.feedbacks.forEach(f => { if (!f.id) f.id = crypto.randomUUID(); });
+    if (Array.isArray(state.sections)) {
+        state.sections.forEach((s, idx) => { if (!s.id) s.id = `sec-${idx + 1}`; });
+    }
     _idsAssigned = true;
 }

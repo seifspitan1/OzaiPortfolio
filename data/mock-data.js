@@ -21,6 +21,11 @@ const MOCK_DATA = {
     hero: {
         imageUrl: 'assets/images/placeholder.jpg'
     },
+    sections: [
+        { id: 'sec-1', title: 'Cartoon Roblox Studio', order: 1 },
+        { id: 'sec-2', title: 'Semi Realistic', order: 2 },
+        { id: 'sec-3', title: 'Realistic', order: 3 }
+    ],
     portfolio: [],
     feedbacks: [
         {

@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Array.isArray(serverData.data.portfolio)) state.portfolio.push(...serverData.data.portfolio);
                 state.feedbacks.length = 0;
                 if (Array.isArray(serverData.data.feedbacks)) state.feedbacks.push(...serverData.data.feedbacks);
+                state.sections.length = 0;
+                if (Array.isArray(serverData.data.sections)) state.sections.push(...serverData.data.sections);
                 assignMissingIds();
                 saveStateToStorage(); // sync local backup
                 bootedFromServer = true;

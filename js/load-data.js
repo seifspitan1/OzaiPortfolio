@@ -87,7 +87,8 @@ async function loadDemoData() {
             data: {
                 hero: mockData.hero || {},
                 portfolio: mockData.portfolio || [],
-                feedbacks: mockData.feedbacks || []
+                feedbacks: mockData.feedbacks || [],
+                sections: mockData.sections || []
             }
         };
 
@@ -139,7 +140,8 @@ async function loadSiteData() {
             responseData.data &&
             typeof responseData.data.hero === 'object' &&
             Array.isArray(responseData.data.portfolio) &&
-            Array.isArray(responseData.data.feedbacks);
+            Array.isArray(responseData.data.feedbacks) &&
+            (!responseData.data.sections || Array.isArray(responseData.data.sections));
 
         if (!isValid) {
             throw new Error('Invalid canonical API response structure');

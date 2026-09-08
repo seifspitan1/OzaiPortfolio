@@ -58,6 +58,14 @@ function isValidPayload(payload) {
             if (typeof item.rating !== 'number' || item.rating < 1 || item.rating > 5) return false;
         }
     }
+    const sections = payload.data.sections;
+    if (Array.isArray(sections)) {
+        for (const sec of sections) {
+            if (!sec.id || typeof sec.id !== 'string') return false;
+            if (!sec.title || typeof sec.title !== 'string') return false;
+            if (typeof sec.order !== 'number' || sec.order < 1) return false;
+        }
+    }
     return true;
 }
 
@@ -112,6 +120,7 @@ export function isValidServerData(data) {
     if (data.data.hero && typeof data.data.hero !== 'object') return false;
     if (data.data.portfolio && !Array.isArray(data.data.portfolio)) return false;
     if (data.data.feedbacks && !Array.isArray(data.data.feedbacks)) return false;
+    if (data.data.sections && !Array.isArray(data.data.sections)) return false;
     return true;
 }
 

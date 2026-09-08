@@ -64,20 +64,57 @@ async function saveHandler(req, res) {
     if (oldPortfolio.data) oldPortfolio.data.forEach(p => oldUrls.add(p.image_url));
     if (oldFeedbacks.data) oldFeedbacks.data.forEach(f => oldUrls.add(f.image_url));
 
-    // 6. Execute atomic SQL sync inside Supabase using RPC function
-    const { data: newLastModified, error: rpcError } = await supabase.rpc('sync_portfolio_state', {
+    // 6. Execute atomic SQL sync inside Supabase using RPC function (with sections support)
+    let newLastModified;
+    const sectionsInput = payload.data.sections || [];
+
+    const rpcWithSections = await supabase.rpc('sync_portfolio_state', {
         hero_input: payload.data.hero,
         portfolio_input: payload.data.portfolio,
         feedbacks_input: payload.data.feedbacks,
-        client_last_modified: payload.lastModified
+        client_last_modified: payload.lastModified,
+        sections_input: sectionsInput
     });
 
-    if (rpcError) {
-        if (rpcError.message.includes('OCC_CONFLICT')) {
+    if (!rpcWithSections.error) {
+        newLastModified = rpcWithSections.data;
+    } else if (rpcWithSections.error.code === 'PGRST202') {
+        // Fallback if Supabase database RPC has not yet been migrated to 5-param signature:
+        // Execute 4-param RPC + update system_metadata
+        const rpcLegacy = await supabase.rpc('sync_portfolio_state', {
+            hero_input: payload.data.hero,
+            portfolio_input: payload.data.portfolio,
+            feedbacks_input: payload.data.feedbacks,
+            client_last_modified: payload.lastModified
+        });
+
+        if (rpcLegacy.error) {
+            if (rpcLegacy.error.message.includes('OCC_CONFLICT')) {
+                throw new AppError('Conflict: The database was modified by another session. Please reload and try again.', 409, 'CONFLICT');
+            }
+            logger.error('RPC synchronization failed', { rpcError: rpcLegacy.error });
+            throw rpcLegacy.error;
+        }
+
+        newLastModified = rpcLegacy.data;
+
+        // Persist sections configuration to system_metadata
+        const { error: metaError } = await supabase.from('system_metadata').upsert({
+            key: 'portfolio_sections_config',
+            value: JSON.stringify(sectionsInput),
+            updated_at: new Date().toISOString()
+        });
+
+        if (metaError) {
+            logger.error('Failed to persist portfolio_sections_config to system_metadata', { error: metaError });
+            throw metaError;
+        }
+    } else {
+        if (rpcWithSections.error.message.includes('OCC_CONFLICT')) {
             throw new AppError('Conflict: The database was modified by another session. Please reload and try again.', 409, 'CONFLICT');
         }
-        logger.error('RPC synchronization failed', { rpcError });
-        throw rpcError;
+        logger.error('RPC synchronization failed', { rpcError: rpcWithSections.error });
+        throw rpcWithSections.error;
     }
 
     const responseBody = { success: true, savedAt: Number(newLastModified) };

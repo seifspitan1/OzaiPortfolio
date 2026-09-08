@@ -11,6 +11,7 @@ CREATE TABLE system_metadata (
 -- Seed initial metadata
 INSERT INTO system_metadata (key, value) VALUES ('schema_version', '2');
 INSERT INTO system_metadata (key, value) VALUES ('last_modified', '0');
+INSERT INTO system_metadata (key, value) VALUES ('portfolio_sections_config', '[{"id":"sec-1","title":"Cartoon Roblox Studio","order":1},{"id":"sec-2","title":"Semi Realistic","order":2},{"id":"sec-3","title":"Realistic","order":3}]');
 
 -- 2. Hero Section Settings
 CREATE TABLE hero_settings (
@@ -94,7 +95,8 @@ CREATE OR REPLACE FUNCTION sync_portfolio_state(
     hero_input JSONB,
     portfolio_input JSONB,
     feedbacks_input JSONB,
-    client_last_modified BIGINT
+    client_last_modified BIGINT,
+    sections_input JSONB DEFAULT NULL
 ) RETURNS BIGINT AS $$
 DECLARE
     current_last_modified BIGINT;
@@ -143,6 +145,14 @@ BEGIN
         (elem->>'rating')::INTEGER,
         COALESCE(elem->>'imageUrl', '')
     FROM jsonb_array_elements(feedbacks_input) AS elem;
+
+    -- Sync Portfolio Sections Config
+    IF sections_input IS NOT NULL THEN
+        INSERT INTO system_metadata (key, value)
+        VALUES ('portfolio_sections_config', sections_input::TEXT)
+        ON CONFLICT (key) DO UPDATE
+        SET value = EXCLUDED.value, updated_at = NOW();
+    END IF;
 
     -- Generate new epoch millisecond timestamp
     new_last_modified := (extract(epoch from now()) * 1000)::BIGINT;

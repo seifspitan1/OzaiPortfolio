@@ -139,6 +139,10 @@ export async function loadStateFromStorage() {
         state.portfolio.push(...parsed.portfolio);
         state.feedbacks.length = 0;
         state.feedbacks.push(...parsed.feedbacks);
+        state.sections.length = 0;
+        if (Array.isArray(parsed.sections)) {
+            state.sections.push(...parsed.sections);
+        }
         
         assignMissingIds();
 

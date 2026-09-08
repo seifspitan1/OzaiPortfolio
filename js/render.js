@@ -41,6 +41,17 @@ window.renderPortfolio = function (data) {
 
     // Check for empty or missing portfolio
     if (!data || !Array.isArray(data.portfolio) || data.portfolio.length === 0) {
+        // If sections are configured, render their custom titles even when portfolio is empty
+        if (data && Array.isArray(data.sections) && data.sections.length > 0) {
+            const portfolioSections = Array.from(document.querySelectorAll('.portfolio-section'));
+            data.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).forEach((sec, idx) => {
+                const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`) || portfolioSections[idx];
+                if (parentSec) {
+                    const h2 = parentSec.querySelector('h2');
+                    if (h2) h2.textContent = sec.title;
+                }
+            });
+        }
         const primaryGallery = galleries[0];
         if (primaryGallery) {
             const emptyElem = document.createElement('div');
@@ -56,97 +67,95 @@ window.renderPortfolio = function (data) {
     }
 
     // Check if multi-section gallery setup is present
-    const hasSectionGalleries = Array.from(galleries).some(g => g.dataset.section);
+    const hasSectionGalleries = Array.from(galleries).some(g => g.dataset.section || g.dataset.sectionId);
 
     if (hasSectionGalleries) {
-        const defaultSections = ['Section 1', 'Section 2', 'Section 3'];
-        const orderedSections = [];
-
-        // Discover section order sequence from saved portfolio projects order
-        data.portfolio.forEach(item => {
-            const sec = item.section || 'Section 1';
-            if (!orderedSections.includes(sec)) {
-                orderedSections.push(sec);
-            }
-        });
-
-        // Append any default sections not present in data
-        defaultSections.forEach(sec => {
-            if (!orderedSections.includes(sec)) {
-                orderedSections.push(sec);
-            }
-        });
-
-        const sectionsMap = {};
-        orderedSections.forEach(sec => { sectionsMap[sec] = []; });
-
-        data.portfolio.forEach(item => {
-            const sec = item.section || 'Section 1';
-            if (!sectionsMap[sec]) sectionsMap[sec] = [];
-            sectionsMap[sec].push(item);
-        });
+        let sections = [];
+        if (data.sections && Array.isArray(data.sections) && data.sections.length > 0) {
+            sections = data.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+        } else {
+            // Backward-compatibility derivation if data.sections is absent
+            const defaultSections = [
+                { id: 'sec-1', title: 'Cartoon Roblox Studio', order: 1 },
+                { id: 'sec-2', title: 'Semi Realistic', order: 2 },
+                { id: 'sec-3', title: 'Realistic', order: 3 }
+            ];
+            const foundTitles = [];
+            data.portfolio.forEach(item => {
+                const sec = item.section || 'Cartoon Roblox Studio';
+                if (!foundTitles.includes(sec)) foundTitles.push(sec);
+            });
+            sections = defaultSections.map((def, idx) => ({
+                id: def.id,
+                title: foundTitles[idx] || def.title,
+                order: def.order
+            }));
+        }
 
         const portfolioSections = Array.from(document.querySelectorAll('.portfolio-section'));
 
-        orderedSections.forEach((secName, idx) => {
-            let parentSec = portfolioSections[idx];
-            if (parentSec) {
-                const h2 = parentSec.querySelector('h2');
-                if (h2) h2.textContent = secName;
+        sections.forEach((sec, idx) => {
+            // Match by stable data-section-id or fallback to DOM index
+            const parentSec = document.querySelector(`.portfolio-section[data-section-id="${sec.id}"]`) || portfolioSections[idx];
+            if (!parentSec) return;
 
-                const gallery = parentSec.querySelector('.gallery');
-                if (gallery) {
-                    gallery.dataset.section = secName;
-                    const items = sectionsMap[secName] || [];
+            const h2 = parentSec.querySelector('h2');
+            if (h2) h2.textContent = sec.title;
 
-                    while (gallery.firstChild) {
-                        gallery.removeChild(gallery.firstChild);
-                    }
+            const gallery = parentSec.querySelector('.gallery');
+            if (!gallery) return;
 
-                    items.forEach(item => {
-                        const itemElem = document.createElement('div');
-                        itemElem.className = 'gallery-item reveal';
+            gallery.dataset.sectionId = sec.id;
+            gallery.dataset.section = sec.title;
 
-                        const imgElem = document.createElement('img');
-                        if (item.imageUrl) {
-                            imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
-                        } else {
-                            imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
-                        }
-                        imgElem.alt = item.title || 'Portfolio Image';
-                        imgElem.loading = 'lazy';
+            const items = data.portfolio.filter(p => p.sectionId === sec.id || (p.section || 'Cartoon Roblox Studio') === sec.title);
 
-                        const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
-                        let textElem = null;
-                        if (hasTitle) {
-                            textElem = document.createElement('p');
-                            textElem.className = 'gallery-title';
-                            textElem.textContent = item.title.trim();
-                        }
-
-                        if (item.description) {
-                            itemElem.title = item.description;
-                        }
-
-                        if (item.link && item.link.trim() !== '') {
-                            const linkElem = document.createElement('a');
-                            linkElem.href = item.link;
-                            linkElem.target = '_blank';
-                            linkElem.rel = 'noopener noreferrer';
-                            linkElem.style.display = 'block';
-                            linkElem.style.textDecoration = 'none';
-                            linkElem.style.color = 'inherit';
-                            linkElem.appendChild(imgElem);
-                            if (textElem) linkElem.appendChild(textElem);
-                            itemElem.appendChild(linkElem);
-                        } else {
-                            itemElem.appendChild(imgElem);
-                            if (textElem) itemElem.appendChild(textElem);
-                        }
-                        gallery.appendChild(itemElem);
-                    });
-                }
+            while (gallery.firstChild) {
+                gallery.removeChild(gallery.firstChild);
             }
+
+            items.forEach(item => {
+                const itemElem = document.createElement('div');
+                itemElem.className = 'gallery-item reveal';
+
+                const imgElem = document.createElement('img');
+                if (item.imageUrl) {
+                    imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
+                } else {
+                    imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
+                }
+                imgElem.alt = item.title || 'Portfolio Image';
+                imgElem.loading = 'lazy';
+
+                const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
+                let textElem = null;
+                if (hasTitle) {
+                    textElem = document.createElement('p');
+                    textElem.className = 'gallery-title';
+                    textElem.textContent = item.title.trim();
+                }
+
+                if (item.description) {
+                    itemElem.title = item.description;
+                }
+
+                if (item.link && item.link.trim() !== '') {
+                    const linkElem = document.createElement('a');
+                    linkElem.href = item.link;
+                    linkElem.target = '_blank';
+                    linkElem.rel = 'noopener noreferrer';
+                    linkElem.style.display = 'block';
+                    linkElem.style.textDecoration = 'none';
+                    linkElem.style.color = 'inherit';
+                    linkElem.appendChild(imgElem);
+                    if (textElem) linkElem.appendChild(textElem);
+                    itemElem.appendChild(linkElem);
+                } else {
+                    itemElem.appendChild(imgElem);
+                    if (textElem) itemElem.appendChild(textElem);
+                }
+                gallery.appendChild(itemElem);
+            });
         });
     } else {
         // Fallback for single gallery container
