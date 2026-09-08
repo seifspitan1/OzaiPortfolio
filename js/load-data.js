@@ -10,6 +10,7 @@ async function loadSiteData() {
         // Validate API Response
         if (!responseData || typeof responseData.version === 'undefined' || typeof responseData.lastModified === 'undefined' || !responseData.data || !responseData.data.hero || !responseData.data.portfolio || !responseData.data.feedbacks) {
             console.error('Invalid API response structure', responseData);
+            document.body.classList.add('site-loaded');
             return;
         }
         
@@ -31,8 +32,13 @@ async function loadSiteData() {
         }
         
         document.dispatchEvent(new Event('siteDataLoaded'));
+
+        // Phase 1: Dismiss loading overlay after canonical data has been rendered
+        document.body.classList.add('site-loaded');
     } catch (err) {
         console.error('Failed to load site data', err);
+        // Dismiss loading overlay to prevent permanent blocking (Phase 2 will add error UX)
+        document.body.classList.add('site-loaded');
     }
 }
 

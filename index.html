@@ -41,6 +41,10 @@
 </head>
 
 <body>
+    <!-- Phase 1: Neutral loading overlay — hidden after canonical API data renders -->
+    <div id="site-loading-overlay" aria-label="Loading">
+        <div class="loading-spinner"></div>
+    </div>
     <div id="particle-layer" aria-hidden="true"></div>
     <header>
         <nav class="navbar">
@@ -84,7 +88,7 @@
                 <a href="#order" class="cta-button magnetic">Start Your Project</a>
             </div>
             <div class="hero-image">
-                <img src="assets/images/placeholder.jpg" alt="Ozai GFX Hero Render" loading="lazy">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Ozai GFX Hero Render" loading="lazy">
                 <div class="hero-social-links social-links">
                     <a href="https://discord.com/users/1156746551968923648" class="social-icon social-discord" target="_blank"
                         rel="noopener noreferrer" aria-label="Discord profile">
@@ -181,42 +185,7 @@
             <h2>Client Feedbacks</h2>
             <p>Trusted by creators across the Roblox ecosystem — here's what they have to say.</p>
             <div class="feedback-grid">
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Ozai delivered an incredible thumbnail that tripled our game's
-                        click-through rate overnight. Absolutely blown away by the quality."</p>
-                    <span class="feedback-client">Astral Studios</span>
-                </article>
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Best GFX designer I've worked with on Roblox. Fast turnaround, clean
-                        communication, and premium results every single time."</p>
-                    <span class="feedback-client">PixelForge Dev</span>
-                </article>
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Our group logo and banners look insanely professional now. Ozai took our
-                        rough ideas and turned them into something next-level."</p>
-                    <span class="feedback-client">NovaCraft Games</span>
-                </article>
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="4 out of 5 stars">★★★★☆</div>
-                    <p class="feedback-text">"Hired Ozai for a full rebrand — thumbnails, banners, the works. The
-                        attention to detail and cinematic quality is unmatched."</p>
-                    <span class="feedback-client">Horizon Interactive</span>
-                </article>
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"I've commissioned over 20 pieces and they just keep getting better. Ozai
-                        genuinely cares about making your vision come to life."</p>
-                    <span class="feedback-client">Revenant Studios</span>
-                </article>
-                <article class="card feedback-card reveal">
-                    <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
-                    <p class="feedback-text">"Clean, bold, premium — exactly what we needed for our competitive gaming
-                        brand. Would recommend Ozai to any serious studio."</p>
-                    <span class="feedback-client">Apex Esports</span>
-                </article>
+                <!-- Populated dynamically by renderFeedbacks() from canonical API data -->
             </div>
         </section>
 

@@ -166,3 +166,36 @@ footer p {
         justify-content: center;
     }
 }
+
+/* --- Phase 1: Neutral Loading Overlay --- */
+
+#site-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg-deep, #020617);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease;
+}
+
+body.site-loaded #site-loading-overlay {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(56, 189, 248, 0.15);
+    border-top-color: var(--brand-primary, #38bdf8);
+    border-radius: 50%;
+    animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
