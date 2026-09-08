@@ -21,7 +21,7 @@ const MOCK_DATA = {
     hero: {
         imageUrl: 'assets/images/placeholder.jpg'
     },
-
+    portfolio: [],
     feedbacks: [
         {
             clientName: 'Astral Studios',
@@ -56,7 +56,14 @@ const MOCK_DATA = {
     ]
 };
 
-// Do not auto-export in production — this fixture is loaded explicitly only in dev/demo mode
+// Expose for explicit browser dynamic import and node environments
+if (typeof window !== 'undefined') {
+    window.__MOCK_DATA__ = MOCK_DATA;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MOCK_DATA;
 }
+
+export default MOCK_DATA;
+export { MOCK_DATA };

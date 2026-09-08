@@ -13,23 +13,47 @@ window.getAbsoluteImageUrl = function (storedPath) {
 };
 
 window.renderHero = function (data) {
-    if (!data || !data.hero) return;
     const heroImg = document.querySelector('.hero-image img');
-    if (heroImg) {
-        if (data.hero.imageUrl) {
-            heroImg.src = window.getAbsoluteImageUrl(data.hero.imageUrl);
-        } else {
-            heroImg.src = 'https://via.placeholder.com/400x300?text=Image';
-        }
+    if (!heroImg) return;
+
+    if (data && data.hero && data.hero.imageUrl && typeof data.hero.imageUrl === 'string' && data.hero.imageUrl.trim() !== '') {
+        heroImg.src = window.getAbsoluteImageUrl(data.hero.imageUrl);
         heroImg.alt = 'Hero Image';
+        heroImg.classList.remove('empty');
+    } else {
+        // Neutral blank image state — do NOT use placeholder.jpg or fake content
+        heroImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        heroImg.alt = '';
+        heroImg.classList.add('empty');
     }
 };
 
 window.renderPortfolio = function (data) {
-    if (!data || !data.portfolio) return;
-
     const galleries = document.querySelectorAll('.gallery');
     if (galleries.length === 0) return;
+
+    // Clear all galleries first
+    galleries.forEach(gallery => {
+        while (gallery.firstChild) {
+            gallery.removeChild(gallery.firstChild);
+        }
+    });
+
+    // Check for empty or missing portfolio
+    if (!data || !Array.isArray(data.portfolio) || data.portfolio.length === 0) {
+        const primaryGallery = galleries[0];
+        if (primaryGallery) {
+            const emptyElem = document.createElement('div');
+            emptyElem.className = 'empty-state portfolio-empty';
+            emptyElem.setAttribute('role', 'status');
+            emptyElem.innerHTML = '<p class="empty-state-text">No portfolio projects published yet. New work will appear here soon.</p>';
+            primaryGallery.appendChild(emptyElem);
+        }
+        if (typeof window.updateAllGalleryNav === 'function') {
+            window.updateAllGalleryNav();
+        }
+        return;
+    }
 
     // Check if multi-section gallery setup is present
     const hasSectionGalleries = Array.from(galleries).some(g => g.dataset.section);
@@ -181,13 +205,22 @@ window.renderPortfolio = function (data) {
 };
 
 window.renderFeedbacks = function (data) {
-    if (!data || !data.feedbacks) return;
     const container = document.querySelector('.feedback-grid');
     if (!container) return;
 
     // Clear existing
     while (container.firstChild) {
         container.removeChild(container.firstChild);
+    }
+
+    // Check for empty or missing feedbacks
+    if (!data || !Array.isArray(data.feedbacks) || data.feedbacks.length === 0) {
+        const emptyElem = document.createElement('div');
+        emptyElem.className = 'empty-state feedback-empty';
+        emptyElem.setAttribute('role', 'status');
+        emptyElem.innerHTML = '<p class="empty-state-text">No client feedbacks published yet. Reviews will appear here soon.</p>';
+        container.appendChild(emptyElem);
+        return;
     }
 
     data.feedbacks.forEach(item => {

@@ -45,6 +45,28 @@
     <div id="site-loading-overlay" aria-label="Loading">
         <div class="loading-spinner"></div>
     </div>
+
+    <!-- Phase 2: Production Error Container (Accessible alert with Retry button) -->
+    <div id="site-error-container" class="site-error-banner" role="alert" aria-live="assertive" hidden>
+        <div class="site-error-inner">
+            <div class="site-error-message">
+                <svg class="site-error-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Unable to load portfolio data. Please check your connection and try again.</span>
+            </div>
+            <button id="site-retry-btn" class="site-retry-btn" type="button">Retry</button>
+        </div>
+    </div>
+
+    <!-- Phase 2: Demo Mode Indicator (Visible only in explicit local demo mode) -->
+    <div id="site-demo-badge" class="site-demo-badge" role="status" aria-label="Development Demo Mode" hidden>
+        <span class="demo-badge-dot" aria-hidden="true"></span>
+        <span>DEMO DATA</span>
+    </div>
+
     <div id="particle-layer" aria-hidden="true"></div>
     <header>
         <nav class="navbar">
