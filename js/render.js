@@ -93,6 +93,26 @@ function reorderPortfolioSections(sections) {
     }
 }
 
+function placePortfolioSectionTag() {
+    const tag = document.getElementById('portfolio-section-tag') || document.querySelector('.portfolio-section .section-tag');
+    if (!tag) return;
+
+    // Locate the first actual .portfolio-section in the portfolio group's DOM order
+    const firstSection = document.querySelector('main > .portfolio-section, .portfolio-section');
+    if (!firstSection) return;
+
+    const targetH2 = firstSection.querySelector('h2');
+    if (!targetH2) return;
+
+    // If it is already correctly positioned, perform no unnecessary mutation
+    if (tag.parentNode === firstSection && tag.nextElementSibling === targetH2) {
+        return;
+    }
+
+    // Move the existing label node immediately before that section's h2
+    firstSection.insertBefore(tag, targetH2);
+}
+
 window.renderPortfolio = function (data) {
     let sections = [];
     if (data && Array.isArray(data.sections) && data.sections.length > 0) {
@@ -123,6 +143,9 @@ window.renderPortfolio = function (data) {
     if (sections.length > 0) {
         reorderPortfolioSections(sections);
     }
+
+    // Place the portfolio group label above the first section's h2
+    placePortfolioSectionTag();
 
     const galleries = document.querySelectorAll('.gallery');
     if (galleries.length === 0) return;
