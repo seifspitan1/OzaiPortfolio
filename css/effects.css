@@ -138,10 +138,12 @@
         linear-gradient(180deg, #0b1120 0%, #0f172a 45%, #0b1120 100%);
 }
 
-.feedback-stars {
+.feedback-stars,
+.feedback-card .stars,
+.feedback-card .rating-stars {
     font-size: 1.15rem;
     letter-spacing: 2px;
-    color: var(--brand-primary);
+    color: #fbbf24;
     filter: drop-shadow(0 0 4px rgba(var(--brand-primary-rgb), 0.35));
 }
 

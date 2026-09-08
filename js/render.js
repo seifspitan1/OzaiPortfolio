@@ -338,7 +338,7 @@ window.renderFeedbacks = function (data) {
 
         // Stars Rating (Warm Gold)
         const stars = document.createElement('div');
-        stars.className = 'feedback-stars';
+        stars.className = 'feedback-stars rating-stars stars';
         const rating = item.rating || 5;
         stars.setAttribute('aria-label', `${rating} out of 5 stars`);
         stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
