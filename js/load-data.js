@@ -184,7 +184,13 @@ function initRetryHandler() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
     initRetryHandler();
     loadSiteData();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

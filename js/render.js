@@ -12,16 +12,81 @@ window.getAbsoluteImageUrl = function (storedPath) {
     return window.location.origin + basePath + '/' + storedPath;
 };
 
+window.isSupabaseStorageUrl = function (url) {
+    if (!url || typeof url !== 'string') return false;
+    return url.includes('/storage/v1/object/public/');
+};
+
+window.getOptimizedImageUrl = function (canonicalUrl, options = {}) {
+    if (!canonicalUrl || typeof canonicalUrl !== 'string') return '';
+    if (!window.isSupabaseStorageUrl(canonicalUrl)) return canonicalUrl;
+
+    const { width, height, quality = 80, format = 'webp', resize = 'cover' } = options;
+    const transformUrl = canonicalUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+    const params = [];
+    if (width) params.push('width=' + encodeURIComponent(width));
+    if (height) params.push('height=' + encodeURIComponent(height));
+    if (resize && resize !== 'cover') params.push('resize=' + encodeURIComponent(resize));
+    if (quality) params.push('quality=' + encodeURIComponent(quality));
+    if (format) params.push('format=' + encodeURIComponent(format));
+
+    return params.length > 0 ? `${transformUrl}?${params.join('&')}` : transformUrl;
+};
+
+window.setupImageFallback = function (imgElem, canonicalUrl) {
+    if (!imgElem || !canonicalUrl) return;
+    imgElem.dataset.canonicalSrc = canonicalUrl;
+    imgElem.onerror = function () {
+        if (!imgElem.dataset.fallbackApplied) {
+            imgElem.dataset.fallbackApplied = 'true';
+            imgElem.removeAttribute('srcset');
+            imgElem.removeAttribute('sizes');
+            imgElem.src = canonicalUrl;
+        }
+    };
+};
+
 window.renderHero = function (data) {
     const heroImg = document.querySelector('.hero-image img');
     if (!heroImg) return;
 
     if (data && data.hero && data.hero.imageUrl && typeof data.hero.imageUrl === 'string' && data.hero.imageUrl.trim() !== '') {
-        heroImg.src = window.getAbsoluteImageUrl(data.hero.imageUrl);
+        const canonicalUrl = window.getAbsoluteImageUrl(data.hero.imageUrl);
+
+        // 1. Configure loading policy and priority BEFORE assigning source
+        heroImg.loading = 'eager';
+        if ('fetchPriority' in heroImg) {
+            heroImg.fetchPriority = 'high';
+        } else {
+            heroImg.setAttribute('fetchpriority', 'high');
+        }
+        heroImg.decoding = 'async';
+
+        // 2. Setup one-time fallback to canonical original if transform fails
+        window.setupImageFallback(heroImg, canonicalUrl);
+
+        // 3. Responsive variants if Supabase-managed, or direct canonical if unsupported
+        if (window.isSupabaseStorageUrl(canonicalUrl)) {
+            const w400 = window.getOptimizedImageUrl(canonicalUrl, { width: 400, quality: 85, format: 'webp' });
+            const w700 = window.getOptimizedImageUrl(canonicalUrl, { width: 700, quality: 85, format: 'webp' });
+            const w1000 = window.getOptimizedImageUrl(canonicalUrl, { width: 1000, quality: 85, format: 'webp' });
+            const w1270 = window.getOptimizedImageUrl(canonicalUrl, { width: 1270, quality: 85, format: 'webp' });
+
+            heroImg.sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 635px';
+            heroImg.srcset = `${w400} 400w, ${w700} 700w, ${w1000} 1000w, ${w1270} 1270w`;
+            heroImg.src = w700;
+        } else {
+            heroImg.removeAttribute('srcset');
+            heroImg.removeAttribute('sizes');
+            heroImg.src = canonicalUrl;
+        }
+
         heroImg.alt = 'Hero Image';
         heroImg.classList.remove('empty');
     } else {
         // Neutral blank image state — do NOT use placeholder.jpg or fake content
+        heroImg.removeAttribute('srcset');
+        heroImg.removeAttribute('sizes');
         heroImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         heroImg.alt = '';
         heroImg.classList.add('empty');
@@ -111,6 +176,70 @@ function placePortfolioSectionTag() {
 
     // Move the existing label node immediately before that section's h2
     firstSection.insertBefore(tag, targetH2);
+}
+
+function createPortfolioItemElement(item) {
+    const itemElem = document.createElement('div');
+    itemElem.className = 'gallery-item reveal';
+
+    const imgElem = document.createElement('img');
+    const canonicalUrl = item.imageUrl ? window.getAbsoluteImageUrl(item.imageUrl) : '';
+
+    // Deliberate loading policy: lazy loading with async decoding
+    // All attributes configured BEFORE assigning image source
+    imgElem.loading = 'lazy';
+    imgElem.decoding = 'async';
+    imgElem.alt = item.title || 'Portfolio Image';
+    imgElem.width = 371;
+    imgElem.height = 208;
+
+    if (canonicalUrl) {
+        window.setupImageFallback(imgElem, canonicalUrl);
+        itemElem.dataset.fullSrc = canonicalUrl;
+
+        if (window.isSupabaseStorageUrl(canonicalUrl)) {
+            const w375 = window.getOptimizedImageUrl(canonicalUrl, { width: 375, quality: 80, format: 'webp' });
+            const w750 = window.getOptimizedImageUrl(canonicalUrl, { width: 750, quality: 80, format: 'webp' });
+            const w1125 = window.getOptimizedImageUrl(canonicalUrl, { width: 1125, quality: 80, format: 'webp' });
+
+            imgElem.sizes = '(max-width: 768px) 85vw, 375px';
+            imgElem.srcset = `${w375} 375w, ${w750} 750w, ${w1125} 1125w`;
+            imgElem.src = w750;
+        } else {
+            imgElem.src = canonicalUrl;
+        }
+    } else {
+        imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
+    }
+
+    const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
+    let textElem = null;
+    if (hasTitle) {
+        textElem = document.createElement('p');
+        textElem.className = 'gallery-title';
+        textElem.textContent = item.title.trim();
+    }
+
+    if (item.description) {
+        itemElem.title = item.description;
+    }
+
+    if (item.link && item.link.trim() !== '') {
+        const linkElem = document.createElement('a');
+        linkElem.href = item.link;
+        linkElem.target = '_blank';
+        linkElem.rel = 'noopener noreferrer';
+        linkElem.style.display = 'block';
+        linkElem.style.textDecoration = 'none';
+        linkElem.style.color = 'inherit';
+        linkElem.appendChild(imgElem);
+        if (textElem) linkElem.appendChild(textElem);
+        itemElem.appendChild(linkElem);
+    } else {
+        itemElem.appendChild(imgElem);
+        if (textElem) itemElem.appendChild(textElem);
+    }
+    return itemElem;
 }
 
 window.renderPortfolio = function (data) {
@@ -215,46 +344,7 @@ window.renderPortfolio = function (data) {
             }
 
             items.forEach(item => {
-                const itemElem = document.createElement('div');
-                itemElem.className = 'gallery-item reveal';
-
-                const imgElem = document.createElement('img');
-                if (item.imageUrl) {
-                    imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
-                } else {
-                    imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
-                }
-                imgElem.alt = item.title || 'Portfolio Image';
-                imgElem.loading = 'lazy';
-
-                const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
-                let textElem = null;
-                if (hasTitle) {
-                    textElem = document.createElement('p');
-                    textElem.className = 'gallery-title';
-                    textElem.textContent = item.title.trim();
-                }
-
-                if (item.description) {
-                    itemElem.title = item.description;
-                }
-
-                if (item.link && item.link.trim() !== '') {
-                    const linkElem = document.createElement('a');
-                    linkElem.href = item.link;
-                    linkElem.target = '_blank';
-                    linkElem.rel = 'noopener noreferrer';
-                    linkElem.style.display = 'block';
-                    linkElem.style.textDecoration = 'none';
-                    linkElem.style.color = 'inherit';
-                    linkElem.appendChild(imgElem);
-                    if (textElem) linkElem.appendChild(textElem);
-                    itemElem.appendChild(linkElem);
-                } else {
-                    itemElem.appendChild(imgElem);
-                    if (textElem) itemElem.appendChild(textElem);
-                }
-                gallery.appendChild(itemElem);
+                gallery.appendChild(createPortfolioItemElement(item));
             });
         });
     } else {
@@ -265,46 +355,7 @@ window.renderPortfolio = function (data) {
         }
 
         data.portfolio.forEach(item => {
-            const itemElem = document.createElement('div');
-            itemElem.className = 'gallery-item reveal';
-
-            const imgElem = document.createElement('img');
-            if (item.imageUrl) {
-                imgElem.src = window.getAbsoluteImageUrl(item.imageUrl);
-            } else {
-                imgElem.src = 'https://via.placeholder.com/400x300?text=Image';
-            }
-            imgElem.alt = item.title || 'Portfolio Image';
-            imgElem.loading = 'lazy';
-
-            const hasTitle = item.title && typeof item.title === 'string' && item.title.trim() !== '';
-            let textElem = null;
-            if (hasTitle) {
-                textElem = document.createElement('p');
-                textElem.className = 'gallery-title';
-                textElem.textContent = item.title.trim();
-            }
-
-            if (item.description) {
-                itemElem.title = item.description;
-            }
-
-            if (item.link && item.link.trim() !== '') {
-                const linkElem = document.createElement('a');
-                linkElem.href = item.link;
-                linkElem.target = '_blank';
-                linkElem.rel = 'noopener noreferrer';
-                linkElem.style.display = 'block';
-                linkElem.style.textDecoration = 'none';
-                linkElem.style.color = 'inherit';
-                linkElem.appendChild(imgElem);
-                if (textElem) linkElem.appendChild(textElem);
-                itemElem.appendChild(linkElem);
-            } else {
-                itemElem.appendChild(imgElem);
-                if (textElem) itemElem.appendChild(textElem);
-            }
-            container.appendChild(itemElem);
+            container.appendChild(createPortfolioItemElement(item));
         });
     }
 

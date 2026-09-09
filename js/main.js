@@ -56,7 +56,7 @@ function initFeedbackLightbox() {
         modal.classList.remove('active');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        if (imgElem) imgElem.src = '';
+        if (imgElem) imgElem.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     }
 
     document.addEventListener('click', e => {
