@@ -21,12 +21,12 @@ window.getOptimizedImageUrl = function (canonicalUrl, options = {}) {
     if (!canonicalUrl || typeof canonicalUrl !== 'string') return '';
     if (!window.isSupabaseStorageUrl(canonicalUrl)) return canonicalUrl;
 
-    const { width, height, quality = 80, format = 'webp', resize = 'cover' } = options;
+    const { width, height, quality = 80, format = 'webp', resize = 'contain' } = options;
     const transformUrl = canonicalUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
     const params = [];
     if (width) params.push('width=' + encodeURIComponent(width));
     if (height) params.push('height=' + encodeURIComponent(height));
-    if (resize && resize !== 'cover') params.push('resize=' + encodeURIComponent(resize));
+    if (resize) params.push('resize=' + encodeURIComponent(resize));
     if (quality) params.push('quality=' + encodeURIComponent(quality));
     if (format) params.push('format=' + encodeURIComponent(format));
 
