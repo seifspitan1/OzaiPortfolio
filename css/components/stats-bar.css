@@ -1,0 +1,568 @@
+/* ==================================================
+   STATS / SOCIAL PROOF BAR COMPONENT (V3 INTERACTIVE)
+   Premium Glassmorphic Statistics Bar bridging Hero and Services
+   ================================================== */
+
+.stats-bar-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    padding: 0 var(--space-md);
+    margin-top: -44px;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: center;
+
+    /* Pre-animation resting state */
+    opacity: 0;
+    transform: translateY(22px);
+    transition: 
+        opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* State 1: Meaningfully visible in viewport (triggers entrance & counter) */
+.stats-bar-wrapper.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stats-bar-container {
+    width: 100%;
+    max-width: 860px;
+    background: rgba(14, 18, 32, 0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 
+        0 16px 36px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(56, 189, 248, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    padding: 24px 36px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-bar-container:hover {
+    border-color: rgba(96, 165, 250, 0.22);
+    box-shadow: 
+        0 20px 42px rgba(0, 0, 0, 0.45),
+        0 0 25px rgba(56, 189, 248, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+/* ==================================================
+   LAYER 1: AMBIENT MOVING GLOW
+   Runs only when .is-settled
+   ================================================== */
+.stats-bar-container::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 140%;
+    height: 200%;
+    background: radial-gradient(
+        ellipse 380px 140px at 25% 45%,
+        rgba(56, 189, 248, 0.09) 0%,
+        rgba(96, 165, 250, 0.04) 40%,
+        transparent 70%
+    );
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.stats-bar-wrapper.is-settled .stats-bar-container::after {
+    opacity: 1;
+    animation: ambientGlowDrift 12s ease-in-out infinite alternate;
+}
+
+@keyframes ambientGlowDrift {
+    0% {
+        transform: translate(-10%, 0%);
+    }
+    50% {
+        transform: translate(15%, 8%);
+    }
+    100% {
+        transform: translate(25%, -5%);
+    }
+}
+
+/* ==================================================
+   LAYER 2: DESKTOP MOUSE SPOTLIGHT
+   Follows cursor inside container on desktop pointer devices
+   ================================================== */
+.stats-bar-spotlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: inherit;
+    overflow: hidden;
+    opacity: var(--spotlight-opacity, 0);
+    background: radial-gradient(
+        circle 240px at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+        rgba(56, 189, 248, 0.12) 0%,
+        rgba(96, 165, 250, 0.05) 45%,
+        transparent 75%
+    );
+    transition: opacity 0.35s ease;
+}
+
+@media (hover: none) or (pointer: coarse) {
+    .stats-bar-spotlight {
+        display: none !important;
+    }
+}
+
+/* ==================================================
+   LAYER 3: SLOW GLASS LIGHT SWEEP (SHEEN)
+   Runs only when .is-settled
+   ================================================== */
+.stats-bar-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 65%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.01) 30%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(56, 189, 248, 0.04) 55%,
+        transparent 75%
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.stats-bar-wrapper.is-settled .stats-bar-container::before {
+    opacity: 1;
+    animation: glassLightSweep 7.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes glassLightSweep {
+    0% {
+        left: -130%;
+    }
+    18% {
+        left: 150%;
+    }
+    100% {
+        left: 150%;
+    }
+}
+
+/* ==================================================
+   LAYER 4: DIVIDER DRAW-IN ANIMATION
+   Expands from CENTER outward (scaleY(0) -> scaleY(1))
+   ================================================== */
+.stat-divider {
+    width: 1px;
+    height: 42px;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.12) 25%,
+        rgba(255, 255, 255, 0.12) 75%,
+        transparent 100%
+    );
+    flex-shrink: 0;
+    margin: 0 8px;
+    position: relative;
+    z-index: 4;
+
+    /* Pre-animation state: collapsed at center */
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: 
+        transform 0.58s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease,
+        background 250ms ease;
+}
+
+/* Divider 1 draws in at ~120ms */
+.stats-bar-wrapper.is-visible .stat-divider-1 {
+    opacity: 0.85;
+    transform: scaleY(1);
+    transition-delay: 120ms;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.18) 25%,
+        rgba(56, 189, 248, 0.18) 50%,
+        rgba(255, 255, 255, 0.18) 75%,
+        transparent 100%
+    );
+}
+
+/* Divider 2 draws in at ~190ms (70ms stagger) */
+.stats-bar-wrapper.is-visible .stat-divider-2 {
+    opacity: 0.85;
+    transform: scaleY(1);
+    transition-delay: 190ms;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.18) 25%,
+        rgba(56, 189, 248, 0.18) 50%,
+        rgba(255, 255, 255, 0.18) 75%,
+        transparent 100%
+    );
+}
+
+/* State 2: Settled — returns to resting divider appearance with zero transition delay */
+.stats-bar-wrapper.is-settled .stat-divider {
+    opacity: 0.8;
+    transform: scaleY(1);
+    transition-delay: 0ms !important;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.12) 25%,
+        rgba(255, 255, 255, 0.12) 75%,
+        transparent 100%
+    );
+}
+
+/* Subtle divider illumination when neighboring stat is hovered */
+@media (hover: hover) and (pointer: fine) {
+    .stats-bar-container:has(.stat-item:hover) .stat-divider {
+        opacity: 1;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.22) 25%,
+            rgba(56, 189, 248, 0.25) 50%,
+            rgba(255, 255, 255, 0.22) 75%,
+            transparent 100%
+        );
+    }
+}
+
+/* ==================================================
+   LAYER 5: STAT ITEMS & STAGGER REVEAL
+   ================================================== */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+    position: relative;
+    z-index: 5;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: default;
+
+    /* Pre-animation hidden state */
+    opacity: 0;
+    transform: translateY(12px);
+    transition: 
+        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Staggered item appearance */
+.stats-bar-wrapper.is-visible .stat-item-1 {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 120ms;
+}
+
+.stats-bar-wrapper.is-visible .stat-item-2 {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 220ms;
+}
+
+.stats-bar-wrapper.is-visible .stat-item-3 {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 320ms;
+}
+
+/* State 2: Settled — entrance delay removed for instant hover response */
+.stats-bar-wrapper.is-settled .stat-item {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0ms !important;
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease;
+}
+
+/* ==================================================
+   STAT NUMBERS & EFFECT 3 (FINISH GLOW)
+   ================================================== */
+.stat-number {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.2vw, 2.65rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        0 0 16px rgba(56, 189, 248, 0.2);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+/* Effect 3: Finish Glow Pulse */
+@keyframes statFinishGlow {
+    0% {
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 
+            0 2px 10px rgba(0, 0, 0, 0.5),
+            0 0 28px rgba(56, 189, 248, 0.7),
+            0 0 10px rgba(255, 255, 255, 0.75);
+        transform: scale(1.025);
+    }
+    100% {
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2);
+        transform: scale(1);
+    }
+}
+
+.stat-number.finish-glow {
+    animation: statFinishGlow 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==================================================
+   LABEL REVEAL ANIMATION
+   Slides gently out from below number (opacity 0 -> 1, translateY 8px -> 0)
+   ================================================== */
+.stat-label {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    text-wrap: balance;
+    max-width: 180px;
+    position: relative;
+    z-index: 1;
+
+    /* Pre-animation state: hidden below number */
+    opacity: 0;
+    transform: translateY(8px);
+    transition: 
+        opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+        color 0.25s ease;
+}
+
+/* Label reveals shortly after number starts counting */
+.stats-bar-wrapper.is-visible .stat-item-1 .stat-label {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 260ms;
+}
+
+.stats-bar-wrapper.is-visible .stat-item-2 .stat-label {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 380ms;
+}
+
+.stats-bar-wrapper.is-visible .stat-item-3 .stat-label {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 500ms;
+}
+
+/* Once settled, label delay is cleared for instant hover response */
+.stats-bar-wrapper.is-settled .stat-label {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0ms !important;
+}
+
+/* ==================================================
+   INTERACTIVE STAT HOVER
+   ================================================== */
+/* Subtle local radial highlight behind hovered stat — no hard card borders */
+.stat-item::before {
+    content: '';
+    position: absolute;
+    inset: -6px -12px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(56, 189, 248, 0.12) 0%,
+        rgba(96, 165, 250, 0.04) 50%,
+        transparent 75%
+    );
+    border-radius: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: -1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .stats-bar-wrapper .stat-item:hover,
+    .stat-item:hover {
+        transform: translateY(-3px) scale(1.015) !important;
+    }
+
+    .stat-item:hover::before {
+        opacity: 1;
+    }
+
+    .stat-item:hover .stat-number {
+        color: #ffffff;
+        text-shadow: 
+            0 2px 10px rgba(0, 0, 0, 0.5),
+            0 0 24px rgba(56, 189, 248, 0.55),
+            0 0 8px rgba(255, 255, 255, 0.7);
+    }
+
+    .stat-item:hover .stat-label {
+        color: #e2e8f0;
+    }
+}
+
+/* ==================================================
+   TABLET RESPONSIVE SCALING (768px - 1023px)
+   ================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .stats-bar-wrapper {
+        margin-top: -32px;
+        padding: 0 var(--space-md);
+    }
+
+    .stats-bar-container {
+        max-width: 680px;
+        padding: 20px 24px;
+        border-radius: 14px;
+    }
+
+    .stat-item {
+        padding: 8px 12px;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .stat-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        max-width: 150px;
+    }
+
+    .stat-divider {
+        height: 34px;
+        margin: 0 4px;
+    }
+}
+
+/* ==================================================
+   MOBILE RESPONSIVE SCALING (< 768px)
+   ================================================== */
+@media (max-width: 767px) {
+    .stats-bar-wrapper {
+        margin-top: -24px;
+        padding: 0 var(--space-xs);
+    }
+
+    .stats-bar-container {
+        padding: 16px 10px;
+        border-radius: 14px;
+    }
+
+    .stat-item {
+        gap: 4px;
+        padding: 6px 4px;
+    }
+
+    .stat-number {
+        font-size: clamp(1.25rem, 5.2vw, 1.65rem);
+    }
+
+    .stat-label {
+        font-size: clamp(0.56rem, 2vw, 0.64rem);
+        letter-spacing: 0.06em;
+        max-width: 100px;
+        line-height: 1.2;
+    }
+
+    .stat-divider {
+        height: 28px;
+        margin: 0 2px;
+    }
+}
+
+/* Very narrow mobile devices (< 360px) */
+@media (max-width: 359px) {
+    .stats-bar-container {
+        padding: 14px 6px;
+    }
+
+    .stat-item {
+        padding: 4px 2px;
+    }
+
+    .stat-number {
+        font-size: 1.15rem;
+    }
+
+    .stat-label {
+        font-size: 0.52rem;
+        letter-spacing: 0.03em;
+        max-width: 80px;
+    }
+
+    .stat-divider {
+        height: 24px;
+        margin: 0 1px;
+    }
+}
+
+/* ==================================================
+   ACCESSIBILITY: PREFERS REDUCED MOTION
+   ================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .stats-bar-wrapper,
+    .stat-item,
+    .stat-number,
+    .stat-label,
+    .stat-divider {
+        transition: none !important;
+        transform: none !important;
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    .stats-bar-spotlight,
+    .stats-bar-container::before,
+    .stats-bar-container::after,
+    .stat-item::before {
+        display: none !important;
+        animation: none !important;
+    }
+}
