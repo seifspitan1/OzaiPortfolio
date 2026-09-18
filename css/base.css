@@ -143,9 +143,9 @@ footer {
 }
 
 .footer-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     width: 100%;
     max-width: 1200px;
     margin-inline: auto;
@@ -153,22 +153,11 @@ footer {
 
 footer p {
     margin-bottom: 0;
-}
-
-@media (max-width: 767px) {
-    .footer-container {
-        flex-direction: column;
-        gap: var(--space-md);
-        text-align: center;
-    }
-
-    .footer-social {
-        justify-content: center;
-    }
+    justify-self: start;
 }
 
 .developer-credit {
-    margin-top: var(--space-md);
+    justify-self: center;
     text-align: center;
     font-size: 0.85rem;
     color: var(--text-muted);
@@ -194,6 +183,32 @@ footer p {
     border-radius: 3px;
     color: #7dd3fc;
     text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.footer-social {
+    justify-self: end;
+}
+
+@media (max-width: 767px) {
+    .footer-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        text-align: center;
+    }
+
+    footer p {
+        justify-self: auto;
+    }
+
+    .developer-credit {
+        justify-self: auto;
+    }
+
+    .footer-social {
+        justify-content: center;
+        justify-self: auto;
+    }
 }
 
 /* --- Phase 1: Neutral Loading Overlay --- */
