@@ -7,7 +7,7 @@
  *    Does NOT trigger on page load when sitting at scrollTop: 0 with only peeking overlap.
  * 3. Entrance & Stagger: .is-visible applied -> container rises & stat items stagger in.
  * 4. Dividers draw outward from center (scaleY(0) -> scaleY(1), ~580ms).
- * 5. Staggered count-up (0 -> 10M+, 0 -> 100+, 0 -> 50+).
+ * 5. Staggered count-up (0 -> 4+, 0 -> 1,136+, 0 -> 325+).
  * 6. Staggered label reveal: Each label smoothly slides out from below its counting number.
  * 7. Finish glow: 400ms subtle glow pulse upon reaching target values.
  * 8. Settled state: .is-settled applied -> enables idle glass sheen & ambient glow.
@@ -37,13 +37,13 @@ export function initStatsBarEffects() {
     }
 
     const statsConfig = [
-        { target: 10, suffix: 'M+', duration: 950, staggerDelay: 120 },
-        { target: 100, suffix: '+', duration: 1100, staggerDelay: 220 },
-        { target: 50, suffix: '+', duration: 1000, staggerDelay: 320 }
+        { target: 4, suffix: '+', duration: 800, staggerDelay: 120 },
+        { target: 1136, suffix: '+', duration: 1200, staggerDelay: 220 },
+        { target: 325, suffix: '+', duration: 1000, staggerDelay: 320 }
     ];
 
     // Initialize stable counter numbers while hidden (wrapper has opacity: 0)
-    // Completely eliminates any flash of 10M+ resetting to 0
+    // Completely eliminates any flash of final values resetting to 0
     statItems.forEach((item, index) => {
         const numberElem = item.querySelector('.stat-number');
         if (numberElem) {
@@ -114,13 +114,13 @@ function animateCount(elem, target, suffix, duration) {
         const easeOut = 1 - Math.pow(1 - progress, 3);
         const current = Math.round(target * easeOut);
 
-        elem.textContent = `${current}${suffix}`;
+        elem.textContent = `${current.toLocaleString()}${suffix}`;
 
         if (progress < 1) {
             requestAnimationFrame(frame);
         } else {
             // Guarantee exact final value in DOM
-            elem.textContent = `${target}${suffix}`;
+            elem.textContent = `${target.toLocaleString()}${suffix}`;
 
             // Effect: Finish glow pulse
             elem.classList.add('finish-glow');
