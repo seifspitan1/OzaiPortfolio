@@ -566,7 +566,7 @@ export function initPortfolio() {
     });
 
     // Image Upload Handling (retained 100% existing functionality)
-    portfolioContainer.addEventListener('change', e => {
+    portfolioContainer.addEventListener('change', async (e) => {
         if (e.target.classList.contains('projectImageUpload')) {
             const card = e.target.closest('.item-card');
             if (!card || !card.dataset.id) return;
