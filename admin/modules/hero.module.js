@@ -6,7 +6,7 @@
 import { state, _renderHash, _hashHero } from './state.js';
 import { markDirty } from './storage.js';
 import { setIsUploading, requestSync } from './api.js';
-import { getAbsoluteImageUrl, updateSyncStatus } from './ui.module.js';
+import { getAbsoluteImageUrl, updateSyncStatus, compressAndConvertToWebP } from './ui.module.js';
 
 let _heroPreview = null;
 
@@ -35,9 +35,25 @@ export function initHero() {
             const file = e.target.files[0];
             if (!file) return;
 
-            const name = file.name || 'No file selected';
             const heroFileName = document.getElementById('heroFileName');
-            if (heroFileName) heroFileName.textContent = name;
+            if (heroFileName) heroFileName.textContent = file.name || 'No file selected';
+
+            updateSyncStatus("Optimizing & converting image... ⏳", "syncing");
+
+            let uploadFile = file;
+            try {
+                uploadFile = await compressAndConvertToWebP(file);
+            } catch (optErr) {
+                console.warn('[Hero Image Optimizer] Fallback to original file:', optErr);
+            }
+
+            if (uploadFile.size > 4 * 1024 * 1024) {
+                updateSyncStatus("Hero image exceeds 4MB limit after compression ❌", "error");
+                e.target.value = '';
+                return;
+            }
+
+            if (heroFileName) heroFileName.textContent = uploadFile.name;
 
             const reader = new FileReader();
             reader.onload = async (ev) => {
@@ -48,7 +64,7 @@ export function initHero() {
                 console.log("UPLOAD START [HERO]");
 
                 const formData = new FormData();
-                formData.append('image', file);
+                formData.append('image', uploadFile);
 
                 setIsUploading(true);
                 try {
@@ -61,14 +77,19 @@ export function initHero() {
                     }
 
                     if (!res.ok) {
-                        throw new Error("Network error");
+                        let errMsg = "Upload failed";
+                        try {
+                            const errData = await res.json();
+                            if (errData && errData.error) errMsg = errData.error;
+                        } catch (_) {}
+                        throw new Error(errMsg);
                     }
 
                     let data;
                     try {
                         data = await res.json();
                     } catch (e) {
-                        throw new Error("Invalid JSON");
+                        throw new Error("Invalid server response format");
                     }
 
                     if (!data.success || !data.url) {
@@ -89,17 +110,16 @@ export function initHero() {
                     if (_heroPreview) _heroPreview.src = data.fullUrl || getAbsoluteImageUrl(data.url);
                 } catch (err) {
                     console.error('Upload error:', err);
-                    updateSyncStatus("Image upload failed ❌", "error");
+                    updateSyncStatus(err.message || "Image upload failed ❌", "error");
                     if (_heroPreview) _heroPreview.src = previousSrc;
+                } finally {
+                    setIsUploading(false);
+                    setTimeout(() => requestSync(), 300);
+                    _renderHash.hero = ''; 
+                    markDirty();
                 }
-                
-                setIsUploading(false);
-                setTimeout(() => requestSync(), 300);
-
-                _renderHash.hero = ''; 
-                markDirty();
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(uploadFile);
         });
     }
 }

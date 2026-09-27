@@ -8,7 +8,7 @@
 import { state, _renderHash, _hashPortfolio } from './state.js';
 import { markDirty } from './storage.js';
 import { setIsUploading, requestSync } from './api.js';
-import { getAbsoluteImageUrl, updateSyncStatus } from './ui.module.js';
+import { getAbsoluteImageUrl, updateSyncStatus, compressAndConvertToWebP } from './ui.module.js';
 
 let portfolioContainer = null;
 let projectTpl = null;
@@ -575,15 +575,25 @@ export function initPortfolio() {
             const file = e.target.files[0];
             if (!file) return;
 
-            // Client-side file size limit validation (4MB max)
-            if (file.size > 4 * 1024 * 1024) {
-                updateSyncStatus("Image exceeds 4MB limit ❌", "error");
+            const fileNameSpan = card.querySelector('.file-name');
+            if (fileNameSpan) fileNameSpan.textContent = file.name;
+
+            updateSyncStatus("Optimizing & converting image... ⏳", "syncing");
+
+            let uploadFile = file;
+            try {
+                uploadFile = await compressAndConvertToWebP(file);
+            } catch (optErr) {
+                console.warn('[Image Optimizer] Fallback to original file:', optErr);
+            }
+
+            if (uploadFile.size > 4 * 1024 * 1024) {
+                updateSyncStatus("Image exceeds 4MB limit after compression ❌", "error");
                 e.target.value = '';
                 return;
             }
 
-            const fileNameSpan = card.querySelector('.file-name');
-            if (fileNameSpan) fileNameSpan.textContent = file.name;
+            if (fileNameSpan) fileNameSpan.textContent = uploadFile.name;
 
             const reader = new FileReader();
             reader.onload = async (ev) => {
@@ -594,7 +604,7 @@ export function initPortfolio() {
                 if (imgNode) imgNode.src = base64; // Optimistic preview
 
                 const formData = new FormData();
-                formData.append('image', file);
+                formData.append('image', uploadFile);
 
                 setIsUploading(true);
                 try {
@@ -652,7 +662,7 @@ export function initPortfolio() {
                     markDirty();
                 }
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(uploadFile);
         }
     });
 }
