@@ -197,6 +197,7 @@ footer p {
 }
 
 .footer-social {
+    grid-column: 3;
     justify-self: end;
 }
 
