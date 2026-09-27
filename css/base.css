@@ -112,7 +112,7 @@ section {
     overflow-x: hidden;
 }
 
-.portfolio-section:not(:last-of-type) {
+.portfolio-section:has(+ .portfolio-section) {
     padding-bottom: 0;
 }
 
@@ -124,6 +124,17 @@ section {
     .portfolio-section + .portfolio-section {
         padding-top: 52px;
     }
+}
+
+/* Generous breathing room between the final portfolio section (Realistic) and Client Feedbacks */
+.portfolio-section.is-last-portfolio-section,
+.portfolio-section:not(:has(+ .portfolio-section)),
+#portfolio-sec-3 {
+    padding-bottom: 70px;
+}
+
+#feedbacks {
+    padding-top: 60px;
 }
 
 #commissions {

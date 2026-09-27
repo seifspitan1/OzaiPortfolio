@@ -60,7 +60,17 @@ export function syncPortfolioStateOrders() {
     state.portfolio.forEach(p => {
         let matchedSec = state.sections.find(s => s.id === p.sectionId);
         if (!matchedSec && p.section) {
-            matchedSec = state.sections.find(s => s.title === p.section);
+            matchedSec = state.sections.find(s => s.title === p.section || s.id === p.section);
+        }
+        if (!matchedSec && p.section) {
+            const pSecLower = p.section.toLowerCase().trim();
+            if (pSecLower.includes('cartoon') || pSecLower === 'section 1' || pSecLower === 'sec-1') {
+                matchedSec = state.sections.find(s => s.id === 'sec-1' || s.order === 1);
+            } else if (pSecLower.includes('semi') || pSecLower === 'section 2' || pSecLower === 'sec-2') {
+                matchedSec = state.sections.find(s => s.id === 'sec-2' || s.order === 2);
+            } else if (pSecLower.includes('realistic') || pSecLower === 'section 3' || pSecLower === 'sec-3') {
+                matchedSec = state.sections.find(s => s.id === 'sec-3' || s.order === 3);
+            }
         }
         if (!matchedSec && state.sections.length > 0) {
             matchedSec = state.sections[0];
@@ -158,6 +168,18 @@ export async function renderPortfolio() {
                         ? getAbsoluteImageUrl(proj.imageUrl)
                         : (proj.image || '');
                     imgNode.src = newSrc;
+                }
+
+                const fileNameNode = card.querySelector('.file-name');
+                if (fileNameNode) {
+                    if (proj.imageUrl) {
+                        const parts = proj.imageUrl.split('/');
+                        const rawName = parts[parts.length - 1];
+                        fileNameNode.textContent = rawName ? rawName.slice(-20) : 'Image uploaded';
+                        fileNameNode.title = rawName || '';
+                    } else {
+                        fileNameNode.textContent = 'No file selected';
+                    }
                 }
 
                 const titleNode = card.querySelector('.project-title');
@@ -553,6 +575,16 @@ export function initPortfolio() {
             const file = e.target.files[0];
             if (!file) return;
 
+            // Client-side file size limit validation (4MB max)
+            if (file.size > 4 * 1024 * 1024) {
+                updateSyncStatus("Image exceeds 4MB limit ❌", "error");
+                e.target.value = '';
+                return;
+            }
+
+            const fileNameSpan = card.querySelector('.file-name');
+            if (fileNameSpan) fileNameSpan.textContent = file.name;
+
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 const base64 = ev.target.result;
@@ -574,13 +606,20 @@ export function initPortfolio() {
                         return;
                     }
 
-                    if (!res.ok) throw new Error("Network error");
+                    if (!res.ok) {
+                        let errMsg = "Upload failed";
+                        try {
+                            const errData = await res.json();
+                            if (errData && errData.error) errMsg = errData.error;
+                        } catch (_) {}
+                        throw new Error(errMsg);
+                    }
 
                     let data;
                     try {
                         data = await res.json();
                     } catch (e) {
-                        throw new Error("Invalid JSON");
+                        throw new Error("Invalid server response format");
                     }
 
                     if (!data.success || !data.url) {
@@ -589,7 +628,6 @@ export function initPortfolio() {
 
                     const index = state.portfolio.findIndex(p => p.id === cardId);
                     if (index === -1) {
-                        setIsUploading(false);
                         return;
                     }
 
@@ -601,17 +639,18 @@ export function initPortfolio() {
                     delete state.portfolio[index].imageId;
 
                     if (imgNode) imgNode.src = data.fullUrl || getAbsoluteImageUrl(data.url);
+                    syncPortfolioStateOrders();
                 } catch (err) {
                     console.error('Upload error:', err);
-                    updateSyncStatus("Image upload failed ❌", "error");
+                    updateSyncStatus(err.message || "Image upload failed ❌", "error");
                     if (imgNode) imgNode.src = previousSrc;
+                    if (fileNameSpan) fileNameSpan.textContent = 'Upload failed';
+                } finally {
+                    setIsUploading(false);
+                    setTimeout(() => requestSync(), 300);
+                    _renderHash.portfolio = '';
+                    markDirty();
                 }
-
-                setIsUploading(false);
-                setTimeout(() => requestSync(), 300);
-
-                _renderHash.portfolio = '';
-                markDirty();
             };
             reader.readAsDataURL(file);
         }

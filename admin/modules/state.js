@@ -38,34 +38,58 @@ export function _hashSections() {
 
 /* ── Utility Functions ─────────────────────── */
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function ensureUUID(id) {
+    return (id && typeof id === 'string' && UUID_REGEX.test(id)) ? id : crypto.randomUUID();
+}
+
 export function sanitizeNetworkState(stateObj) {
     if (!stateObj) return stateObj;
 
     // We explicitly serialize properties to ensure fields like imageUrl are properly persisted
     const cleanHero = {
-        id: stateObj.hero.id || '',
-        imageUrl: stateObj.hero.imageUrl || ''
+        id: ensureUUID(stateObj.hero?.id),
+        imageUrl: stateObj.hero?.imageUrl || ''
     };
 
-    const cleanPortfolio = (stateObj.portfolio || []).map(p => {
-        return {
-            id: p.id || '',
-            order: p.order || 0,
-            title: p.title || '',
-            description: p.description || '',
-            link: p.link || '',
-            imageUrl: p.imageUrl || '',
-            section: p.section || 'Section 1'
-        };
-    });
+    // Filter out draft projects without an image so incomplete drafts do not break sync
+    const cleanPortfolio = (stateObj.portfolio || [])
+        .filter(p => p.imageUrl && typeof p.imageUrl === 'string' && p.imageUrl.trim() !== '')
+        .map((p, idx) => {
+            // Accurately map section name to match the target section title
+            let sectionName = p.section;
+            if (p.sectionId && Array.isArray(stateObj.sections)) {
+                const matchedSec = stateObj.sections.find(s => s.id === p.sectionId);
+                if (matchedSec && matchedSec.title) {
+                    sectionName = matchedSec.title;
+                }
+            }
+            if (!sectionName && Array.isArray(stateObj.sections) && stateObj.sections.length > 0) {
+                sectionName = stateObj.sections[0].title;
+            }
+            if (!sectionName) {
+                sectionName = 'Cartoon Roblox Studio';
+            }
 
-    const cleanFeedbacks = (stateObj.feedbacks || []).map(f => {
+            return {
+                id: ensureUUID(p.id),
+                order: typeof p.order === 'number' && p.order > 0 ? p.order : idx + 1,
+                title: p.title || '',
+                description: p.description || '',
+                link: p.link || '',
+                imageUrl: p.imageUrl.trim(),
+                section: sectionName
+            };
+        });
+
+    const cleanFeedbacks = (stateObj.feedbacks || []).map((f, idx) => {
         return {
-            id: f.id || '',
-            order: f.order || 0,
+            id: ensureUUID(f.id),
+            order: typeof f.order === 'number' && f.order > 0 ? f.order : idx + 1,
             clientName: f.clientName || '',
             text: f.text || '',
-            rating: f.rating || 0,
+            rating: typeof f.rating === 'number' && f.rating >= 1 && f.rating <= 5 ? f.rating : 5,
             imageUrl: f.imageUrl || ''
         };
     });
@@ -74,7 +98,7 @@ export function sanitizeNetworkState(stateObj) {
         return {
             id: s.id || `sec-${idx + 1}`,
             title: s.title || `Section ${idx + 1}`,
-            order: s.order || idx + 1
+            order: typeof s.order === 'number' && s.order > 0 ? s.order : idx + 1
         };
     });
 

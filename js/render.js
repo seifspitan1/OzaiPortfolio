@@ -336,6 +336,14 @@ window.renderPortfolio = function (data) {
                 if (p.sectionId) {
                     return p.sectionId === sec.id;
                 }
+                const pSec = (p.section || '').trim().toLowerCase();
+                const sTitle = (sec.title || '').trim().toLowerCase();
+                const sId = (sec.id || '').trim().toLowerCase();
+
+                if (pSec === sTitle || pSec === sId) return true;
+                if (sec.id === 'sec-1' && (pSec === 'section 1' || pSec.includes('cartoon'))) return true;
+                if (sec.id === 'sec-2' && (pSec === 'section 2' || pSec.includes('semi'))) return true;
+                if (sec.id === 'sec-3' && (pSec === 'section 3' || (pSec.includes('realistic') && !pSec.includes('semi')))) return true;
                 return (p.section || 'Cartoon Roblox Studio') === sec.title;
             });
 
@@ -346,6 +354,12 @@ window.renderPortfolio = function (data) {
             items.forEach(item => {
                 gallery.appendChild(createPortfolioItemElement(item));
             });
+        });
+
+        // Ensure the last portfolio section in DOM gets is-last-portfolio-section class for spacing
+        const allPortfolioSecs = document.querySelectorAll('.portfolio-section');
+        allPortfolioSecs.forEach((secNode, idx) => {
+            secNode.classList.toggle('is-last-portfolio-section', idx === allPortfolioSecs.length - 1);
         });
     } else {
         // Fallback for single gallery container

@@ -17,9 +17,18 @@ const RETRY_LIMIT = 2;
 const RETRY_BASE_DELAY = 500;
 
 /* ── Auto Sync Queue ───────────────────────── */
+let activeUploadCount = 0;
 export let isUploading = false;
 export function setIsUploading(val) {
-    isUploading = val;
+    if (val) {
+        activeUploadCount++;
+    } else {
+        activeUploadCount = Math.max(0, activeUploadCount - 1);
+    }
+    isUploading = activeUploadCount > 0;
+}
+export function getIsUploading() {
+    return isUploading;
 }
 
 let isSyncing = false;
@@ -36,37 +45,41 @@ export function requestSync() {
     processQueue();
 }
 
-function isValidPayload(payload) {
-    if (!payload || !payload.data) return false;
+function validatePayload(payload) {
+    if (!payload || !payload.data) return { valid: false, reason: 'Invalid data payload' };
     const hero = payload.data.hero;
     if (!hero || !hero.imageUrl || hero.imageUrl.trim() === '') {
-        return false;
+        return { valid: false, reason: 'Hero image is required' };
     }
     const portfolio = payload.data.portfolio;
     if (Array.isArray(portfolio)) {
         for (const item of portfolio) {
             if (!item.imageUrl || item.imageUrl.trim() === '') {
-                return false;
+                return { valid: false, reason: 'All projects must have an image' };
             }
         }
     }
     const feedbacks = payload.data.feedbacks;
     if (Array.isArray(feedbacks)) {
         for (const item of feedbacks) {
-            if (!item.clientName || item.clientName.trim() === '') return false;
-            if (!item.text || item.text.trim() === '') return false;
-            if (typeof item.rating !== 'number' || item.rating < 1 || item.rating > 5) return false;
+            if (!item.clientName || item.clientName.trim() === '') return { valid: false, reason: 'Feedback client name is required' };
+            if (!item.text || item.text.trim() === '') return { valid: false, reason: 'Feedback text is required' };
+            if (typeof item.rating !== 'number' || item.rating < 1 || item.rating > 5) return { valid: false, reason: 'Feedback rating must be 1-5' };
         }
     }
     const sections = payload.data.sections;
     if (Array.isArray(sections)) {
         for (const sec of sections) {
-            if (!sec.id || typeof sec.id !== 'string') return false;
-            if (!sec.title || typeof sec.title !== 'string') return false;
-            if (typeof sec.order !== 'number' || sec.order < 1) return false;
+            if (!sec.id || typeof sec.id !== 'string') return { valid: false, reason: 'Invalid section identifier' };
+            if (!sec.title || typeof sec.title !== 'string') return { valid: false, reason: 'Section title is required' };
+            if (typeof sec.order !== 'number' || sec.order < 1) return { valid: false, reason: 'Section order must be a positive integer' };
         }
     }
-    return true;
+    return { valid: true };
+}
+
+function isValidPayload(payload) {
+    return validatePayload(payload).valid;
 }
 
 async function processQueue() {
@@ -76,8 +89,11 @@ async function processQueue() {
 
     const payload = { version: 2, lastModified: state.lastModified || Date.now(), data: sanitizeNetworkState(state) };
 
-    if (!isValidPayload(payload)) {
-        console.warn('Skipping server sync: state payload contains missing or invalid required fields.');
+    const validation = validatePayload(payload);
+    if (!validation.valid) {
+        console.warn('Skipping server sync:', validation.reason);
+        updateSyncStatus(validation.reason + ' ⚠️', 'error');
+        pendingSync = false;
         return;
     }
 
